@@ -39,9 +39,7 @@ class Screen:
                 self.quit()
 
     def draw(self):
-        self.display.fill(colours["black"])
-
-        self.window.draw(self.display, Coords([0,0]))
+        self.window.draw(self.display, Coords([0,0]), self.window.size)
 
         pygame.display.update()
 
@@ -70,10 +68,32 @@ class Window:
             if window.name == name:
                 return window
 
-    def draw(self, display, delta):
-        display.fill(self.colour, (self.loc.x + delta.x, self.loc.y + delta.y, self.size.x, self.size.y))
+    def draw(self, display, delta, parent):
+        if self.loc.x + self.size.x > parent.x:
+            x_size = parent.x - self.loc.x
+        else:
+            x_size = self.size.x
+
+        if self.loc.y + self.size.y > parent.y:
+            y_size = parent.y - self.loc.y
+        else:
+            y_size = self.size.y
+
+        if self.loc.x < 0:
+            x_loc = delta.x
+            x_size += self.loc.x
+        else:
+            x_loc = self.loc.x + delta.x
+
+        if self.loc.y < 0:
+            y_loc = delta.y
+            y_size += self.loc.y
+        else:
+            y_loc = self.loc.y + delta.y
+        display.fill(self.colour, (x_loc, y_loc, x_size, y_size))
+        
         for window in self.windows:
-            window.draw(display, Coords([self.loc.x + delta.x, self.loc.y + delta.y]))
+            window.draw(display, Coords([self.loc.x + delta.x, self.loc.y + delta.y]), self.size)
 
 class Coords:
     def __init__(self, loc):
