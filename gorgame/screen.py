@@ -58,10 +58,16 @@ class Window:
         self.height = height
         self.windows = []
         self.name = name
+        self.text = None
+        self.text_colour = None
 
     def add_window(self, loc, size, colour, height, name):
         self.windows.append(Window(loc, size, colours[colour], height, name))
         self.sort_windows()
+
+    def add_text(self, text, colour):
+        self.text = text
+        self.text_colour = colours[colour]
 
     def sort_windows(self):
         self.windows = sorted(self.windows, key = lambda x: x.height)
@@ -94,6 +100,16 @@ class Window:
         else:
             y_loc = self.loc.y + delta.y
         display.fill(self.colour, (x_loc, y_loc, x_size, y_size))
+
+        if self.text:
+            font = pygame.font.SysFont("arial", 200)
+            text_surf = font.render(self.text, True, self.text_colour)
+            x_per_letter = int(x_size / (len(self.text) * 0.75))
+            text_size = min(y_size, x_per_letter)
+            text_surf = pygame.transform.scale(text_surf, (int(len(self.text) * text_size * 0.75), text_size))
+            x_text = x_loc + (x_size - text_surf.get_width()) // 2
+            y_text = y_loc + (y_size - text_surf.get_height()) // 2
+            display.blit(text_surf, (x_text, y_text))
 
         for window in self.windows:
             window.draw(display, Coords([self.loc.x + delta.x, self.loc.y + delta.y]), self.size)
