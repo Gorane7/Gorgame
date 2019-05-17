@@ -27,6 +27,7 @@ class Screen:
         self.display = pygame.display.set_mode(size)
         pygame.display.set_caption("Game")
         self.window = Window([0,0], [size[0], size[1]], colours["black"], 0, "main window")
+        self.mouse_pos = Coords([0, 0])
 
     def loop(self):
         self.event_handle()
@@ -37,6 +38,8 @@ class Screen:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.quit()
+            elif event.type == pygame.MOUSEMOTION:
+                self.mouse_pos = Coords([event.pos[0], event.pos[1]])
 
     def draw(self):
         self.window.draw(self.display, Coords([0,0]), self.window.size)
@@ -91,7 +94,7 @@ class Window:
         else:
             y_loc = self.loc.y + delta.y
         display.fill(self.colour, (x_loc, y_loc, x_size, y_size))
-        
+
         for window in self.windows:
             window.draw(display, Coords([self.loc.x + delta.x, self.loc.y + delta.y]), self.size)
 
