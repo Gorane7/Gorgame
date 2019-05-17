@@ -28,6 +28,7 @@ class Screen:
         pygame.display.set_caption("Game")
         self.window = Window([0,0], [size[0], size[1]], colours["black"], 0, "main window")
         self.mouse_pos = Coords([0, 0])
+        self.current_window = None
 
     def loop(self):
         self.event_handle()
@@ -40,6 +41,7 @@ class Screen:
                 self.quit()
             elif event.type == pygame.MOUSEMOTION:
                 self.mouse_pos = Coords([event.pos[0], event.pos[1]])
+                self.current_window = self.window.get_current_window(self.mouse_pos)
 
     def draw(self):
         self.window.draw(self.display, Coords([0,0]), self.window.size)
@@ -51,7 +53,7 @@ class Screen:
         quit()
 
 class Window:
-    def __init__(self, loc, size, colour, height, name):
+    def __init__(self, loc, size, colour, height, name, scrollable = False):
         self.loc = Coords([loc[0], loc[1]])
         self.size = Coords([size[0], size[1]])
         self.colour = colour
@@ -60,9 +62,10 @@ class Window:
         self.name = name
         self.text = None
         self.text_colour = None
+        self.scrollable = scrollable
 
-    def add_window(self, loc, size, colour, height, name):
-        self.windows.append(Window(loc, size, colours[colour], height, name))
+    def add_window(self, loc, size, colour, height, name, scrollable = False):
+        self.windows.append(Window(loc, size, colours[colour], height, name, scrollable = scrollable))
         self.sort_windows()
 
     def add_text(self, text, colour):
@@ -76,6 +79,20 @@ class Window:
         for window in self.windows:
             if window.name == name:
                 return window
+
+    def get_current_window(self, pos):
+        for window in reversed(self.windows):
+            if window.contains(pos):
+                return window.get_current_window(Coords([pos.x - window.loc.x, pos.y - window.loc.y]))
+        return self
+
+    def contains(self, pos):
+        if pos.x > self.loc.x and pos.x < self.loc.x + self.size.x and pos.y > self.loc.y and pos.y < self.loc.y + self.size.y:
+            return True
+        return False
+
+    def __str__(self):
+        return self.name
 
     def draw(self, display, delta, parent):
         if self.loc.x + self.size.x > parent.x:
