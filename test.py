@@ -16,9 +16,11 @@ game.window.add_window([500, 0], [200, 500], "grey", 10, "data")
 game.window.get("data").add_window([0, 0], [200, 30], "black", 1, "x_coord_box")
 game.window.get("data").add_window([0, 30], [200, 30], "black", 1, "y_coord_box")
 game.window.get("data").add_window([0, 60], [200, 30], "black", 1, "current_box")
+game.window.get("data").add_window([0, 90], [200, 30], "black", 1, "current_scroll_box")
 
 while True:
     game.window.get("data").get("x_coord_box").add_text("x: " + str(game.mouse_pos.x), "red")
     game.window.get("data").get("y_coord_box").add_text("y: " + str(game.mouse_pos.y), "red")
     game.window.get("data").get("current_box").add_text(str(game.current_window), "red")
+    game.window.get("data").get("current_scroll_box").add_text(str(game.current_scrollable), "red")
     game.loop()

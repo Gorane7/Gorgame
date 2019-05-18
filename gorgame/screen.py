@@ -29,6 +29,7 @@ class Screen:
         self.window = Window([0,0], [size[0], size[1]], colours["black"], 0, "main window")
         self.mouse_pos = Coords([0, 0])
         self.current_window = None
+        self.current_scrollable = None
 
     def loop(self):
         self.event_handle()
@@ -42,6 +43,7 @@ class Screen:
             elif event.type == pygame.MOUSEMOTION:
                 self.mouse_pos = Coords([event.pos[0], event.pos[1]])
                 self.current_window = self.window.get_current_window(self.mouse_pos)
+                self.current_scrollable = self.window.get_current_window(self.mouse_pos, scrollable = True)
 
     def draw(self):
         self.window.draw(self.display, Coords([0,0]), self.window.size)
@@ -80,10 +82,13 @@ class Window:
             if window.name == name:
                 return window
 
-    def get_current_window(self, pos):
+    def get_current_window(self, pos, scrollable = False):
         for window in reversed(self.windows):
-            if window.contains(pos):
-                return window.get_current_window(Coords([pos.x - window.loc.x, pos.y - window.loc.y]))
+            if (scrollable and window.scrollable) or not scrollable:
+                if window.contains(pos):
+                    return window.get_current_window(Coords([pos.x - window.loc.x, pos.y - window.loc.y]), scrollable = scrollable)
+        if self.name == "main window":
+            return None
         return self
 
     def contains(self, pos):
