@@ -1,5 +1,5 @@
 import pygame
-from enum import Enum
+from gorgame import basics
 
 #CONSTANTS
 #COLORS
@@ -22,42 +22,21 @@ colours = {
 
 class Screen:
     def __init__(self, size):
-        self.clock = pygame.time.Clock()
-        pygame.init()
         self.display = pygame.display.set_mode(size)
         pygame.display.set_caption("Game")
         self.window = Window([0,0], [size[0], size[1]], colours["black"], 0, "main window")
-        self.mouse_pos = Coords([0, 0])
+        self.mouse_pos = basics.Coords([0, 0])
         self.current_entity = None
         self.current_window = None
 
-    def loop(self):
-        self.event_handle()
-        self.draw()
-        self.clock.tick(30)
-
-    def event_handle(self):
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                self.quit()
-            elif event.type == pygame.MOUSEMOTION:
-                self.mouse_pos = Coords([event.pos[0], event.pos[1]])
-                self.current_entity = self.window.get_current_entity(self.mouse_pos)
-                self.current_window = self.window.get_current_window(self.mouse_pos)
-
     def draw(self):
-        self.window.draw(self.display, Coords([0,0]), self.window.size)
-
+        self.window.draw(self.display, basics.Coords([0,0]), self.window.size)
         pygame.display.update()
-
-    def quit(self):
-        pygame.quit()
-        quit()
 
 class Entity:
     def __init__(self, loc, size, colour, height, name):
-        self.loc = Coords([loc[0], loc[1]])
-        self.size = Coords([size[0], size[1]])
+        self.loc = basics.Coords([loc[0], loc[1]])
+        self.size = basics.Coords([size[0], size[1]])
         self.colour = colour
         self.height = height
         self.name = name
@@ -94,7 +73,7 @@ class Entity:
             y_loc = self.loc.y + delta.y
         display.fill(self.colour, (x_loc, y_loc, x_size, y_size))
 
-        return Coords([x_size, y_size]), Coords([x_loc, y_loc])
+        return basics.Coords([x_size, y_size]), basics.Coords([x_loc, y_loc])
 
 class Textbox(Entity):
     def __init__(self, loc, size, colour, height, name):
@@ -145,7 +124,7 @@ class Window(Entity):
         for component in reversed(self.components):
             if component.contains(pos):
                 if isinstance(component, Window):
-                    return component.get_current_entity(Coords([pos.x - component.loc.x, pos.y - component.loc.y]))
+                    return component.get_current_entity(basics.Coords([pos.x - component.loc.x, pos.y - component.loc.y]))
                 return component
         if self.name == "main window":
             return None
@@ -164,9 +143,4 @@ class Window(Entity):
         size, loc = super().draw(display, delta, parent)
 
         for component in self.components:
-            component.draw(display, Coords([self.loc.x + delta.x, self.loc.y + delta.y]), self.size)
-
-class Coords:
-    def __init__(self, loc):
-        self.x = loc[0]
-        self.y = loc[1]
+            component.draw(display, basics.Coords([self.loc.x + delta.x, self.loc.y + delta.y]), self.size)
