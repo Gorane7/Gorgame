@@ -93,10 +93,11 @@ class Textbox(Entity):
             text_surf = font.render(self.text, True, self.text_colour)
             x_per_letter = int(size.x / (len(self.text) * 0.75))
             text_size = min(size.y, x_per_letter)
-            text_surf = pygame.transform.scale(text_surf, (int(len(self.text) * text_size * 0.75), text_size))
-            x_text = loc.x + (size.x - text_surf.get_width()) // 2
-            y_text = loc.y + (size.y - text_surf.get_height()) // 2
-            display.blit(text_surf, (x_text, y_text))
+            if text_size > 0:
+                text_surf = pygame.transform.scale(text_surf, (int(len(self.text) * text_size * 0.75), text_size))
+                x_text = loc.x + (size.x - text_surf.get_width()) // 2
+                y_text = loc.y + (size.y - text_surf.get_height()) // 2
+                display.blit(text_surf, (x_text, y_text))
 
 class Window(Entity):
     def __init__(self, loc, size, colour, height, name):
