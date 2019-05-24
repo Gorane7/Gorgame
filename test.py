@@ -5,6 +5,9 @@ size = (700,500)
 
 game = game.Game(size)
 
+game.add_map([5, 5], "test")
+print(game.maps["test"].data)
+
 game.screen.window.add_component([0, 0], [500, 500], "white", 5, "display", window = True)
 game.screen.window.get("display").add_component([20, 20], [100, 200], "green", 2, "gwin", window = True)
 game.screen.window.get("display").add_component([50, 50], [300, 30], "blue", 1, "bwin")
