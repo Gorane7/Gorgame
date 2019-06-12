@@ -4,20 +4,21 @@ from gorgame import basics
 #CONSTANTS
 #COLORS
 colours = {
-    "green": (0, 220, 0),
-    "blue": (0, 0, 255),
-    "red": (255, 0, 0),
-    "grey": (127, 127, 127),
-    "black": (0, 0, 0),
-    "white": (255, 255, 255),
-    "yellow": (255, 255, 0),
-    "pink": (255, 0, 255),
-    "teal": (0, 255, 255),
-    "dark_blue": (0, 0, 127),
-    "dark_teal": (0, 127, 127),
-    "dark_red": (127, 0, 0),
-    "dark_green": (0, 110, 0),
-    "purple": (127, 0, 127),
+    "green": [0, 220, 0],
+    "blue": [0, 0, 255],
+    "red": [255, 0, 0],
+    "grey": [127, 127, 127],
+    "black": [0, 0, 0],
+    "white": [255, 255, 255],
+    "yellow": [255, 255, 0],
+    "pink": [255, 0, 255],
+    "teal": [0, 255, 255],
+    "dark_blue": [0, 0, 127],
+    "dark_teal": [0, 127, 127],
+    "dark_red": [127, 0, 0],
+    "dark_green": [0, 110, 0],
+    "purple": [127, 0, 127],
+    "brown": [139, 69, 19]
 }
 
 class Screen:
@@ -75,6 +76,37 @@ class Entity:
 
         return basics.Coords([x_size, y_size]), basics.Coords([x_loc, y_loc])
 
+class Gridview(Entity):
+    def __init__(self, loc, size, colour, height, name):
+        Entity.__init__(self, loc, size, colour, height, name)
+        self.acc = 25
+
+    def add_grid(self, grid):
+        self.grid = grid
+
+    def draw(self, display, delta, parent):
+        size, loc = super().draw(display, delta, parent)
+
+        if self.grid:
+            surface = pygame.Surface((len(self.grid)*self.acc, len(self.grid[0])*self.acc))
+            for i in range(len(self.grid)):
+                for j in range(len(self.grid[i])):
+                    colour = self.get_colour(self.grid[i][j])
+                    surface.fill(colour, (i*self.acc, j*self.acc, self.acc, self.acc))
+            surface = pygame.transform.scale(surface, (self.size.x, self.size.y))
+            display.blit(surface, (delta.x, delta.y))
+
+    def get_colour(self, t_dict):
+        if "red" in t_dict or "green" in t_dict or "blue" in t_dict:
+            colour = [0, 0, 0]
+            if "red" in t_dict:
+                colour[0] = int(t_dict["red"]*256)
+            if "green" in t_dict:
+                colour[1] = int(t_dict["green"]*256)
+            if "blue" in t_dict:
+                colour[2] = int(t_dict["blue"]*256)
+            return colour
+
 class Textbox(Entity):
     def __init__(self, loc, size, colour, height, name):
         Entity.__init__(self, loc, size, colour, height, name)
@@ -104,11 +136,13 @@ class Window(Entity):
         Entity.__init__(self, loc, size, colour, height, name)
         self.components = []
 
-    def add_component(self, loc, size, colour, height, name, window = False, textbox = False):
+    def add_component(self, loc, size, colour, height, name, window = False, textbox = False, gridview = False):
         if window:
             self.components.append(Window(loc, size, colours[colour], height, name))
         elif textbox:
             self.components.append(Textbox(loc, size, colours[colour], height, name))
+        elif gridview:
+            self.components.append(Gridview(loc, size, colours[colour], height, name))
         else:
             self.components.append(Entity(loc, size, colours[colour], height, name))
         self.sort_components()
