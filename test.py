@@ -5,7 +5,7 @@ size = (700,500)
 
 game = game.Game(size)
 
-game.add_map([33,33], "test")
+game.add_map([25,25], "test")
 game.maps["test"].fill_random("red", 0, 1)
 game.maps["test"].fill_random("green", 0, 1)
 game.maps["test"].fill_random("blue", 0, 1)

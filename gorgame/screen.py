@@ -83,6 +83,11 @@ class Gridview(Entity):
 
     def add_grid(self, grid):
         self.grid = grid
+        self.centre = basics.Coords([len(self.grid) / 2, len(self.grid[0]) / 2])
+        self.grid_size = basics.Coords([self.size.x / len(self.grid), self.size.y / len(self.grid[0])])
+
+    def centre_move(self, mouse_move):
+        self.centre = self.centre.add(basics.Coords([ - mouse_move.x / self.grid_size.x,  - mouse_move.y / self.grid_size.y]))
 
     def draw(self, display, delta, parent):
         size, loc = super().draw(display, delta, parent)
@@ -94,7 +99,44 @@ class Gridview(Entity):
                     colour = self.get_colour(self.grid[i][j])
                     surface.fill(colour, (i*self.acc, j*self.acc, self.acc, self.acc))
             surface = pygame.transform.scale(surface, (self.size.x, self.size.y))
-            display.blit(surface, (delta.x, delta.y))
+
+            #surface.scroll(int(self.size.x / len(self.grid) * (len(self.grid) / 2 - self.centre.x)), int(self.size.y / len(self.grid[0])*(len(self.grid[0]) / 2 - self.centre.y)))
+
+            #determines what part of the map is visible
+            x_left = self.centre.x - len(self.grid) / 2
+            x_right = self.centre.x + len(self.grid) / 2
+            y_top = self.centre.y - len(self.grid[0]) / 2
+            y_bottom = self.centre.y + len(self.grid[0]) / 2
+
+            if x_left < 0:
+                x_left = 0
+            if x_left > len(self.grid):
+                x_left = len(self.grid)
+            if x_right < 0:
+                x_right = 0
+            if x_right > len(self.grid):
+                x_right = len(self.grid)
+            if y_top < 0:
+                y_top = 0
+            if y_top > len(self.grid[0]):
+                y_top = len(self.grid[0])
+            if y_bottom < 0:
+                y_bottom = 0
+            if y_bottom > len(self.grid[0]):
+                y_bottom = len(self.grid[0])
+
+            x_size = int((x_right - x_left)*self.size.x / len(self.grid))
+            y_size = int((y_bottom - y_top)*self.size.y / len(self.grid[0]))
+            x_left = x_left * self.size.x / len(self.grid)
+            y_top = y_top * self.size.y / len(self.grid[0])
+            x_right = x_right * self.size.x / len(self.grid)
+            y_bottom = y_bottom * self.size.y / len(self.grid[0])
+            new_delta = basics.Coords([self.size.x - x_right, self.size.y - y_bottom])
+
+            new_surf = pygame.Surface((x_size, y_size))
+            new_surf.blit(surface, (0, 0), (x_left, y_top, x_size, y_size))
+
+            display.blit(new_surf, (delta.x + new_delta.x, delta.y + new_delta.y))
 
     def get_colour(self, t_dict):
         if "red" in t_dict or "green" in t_dict or "blue" in t_dict:
