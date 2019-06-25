@@ -80,6 +80,7 @@ class Gridview(Entity):
     def __init__(self, loc, size, colour, height, name):
         Entity.__init__(self, loc, size, colour, height, name)
         self.acc = 25
+        self.zoom = 1.0
 
     def add_grid(self, grid):
         self.grid = grid
@@ -87,10 +88,19 @@ class Gridview(Entity):
         self.grid_size = basics.Coords([self.size.x / len(self.grid), self.size.y / len(self.grid[0])])
 
     def centre_move(self, mouse_move):
-        self.centre = self.centre.add(basics.Coords([ - mouse_move.x / self.grid_size.x,  - mouse_move.y / self.grid_size.y]))
+        self.centre = self.centre.add(basics.Coords([ - mouse_move.x * self.zoom / self.grid_size.x,  - mouse_move.y * self.zoom / self.grid_size.y]))
+
+    def zoom_in(self):
+        self.zoom *= 1.1
+
+    def zoom_out(self):
+        self.zoom /= 1.1
 
     def draw(self, display, delta, parent):
         size, loc = super().draw(display, delta, parent)
+
+        print(str(self.zoom))
+        print(self.centre)
 
         if self.grid:
             surface = pygame.Surface((len(self.grid)*self.acc, len(self.grid[0])*self.acc))
@@ -98,15 +108,13 @@ class Gridview(Entity):
                 for j in range(len(self.grid[i])):
                     colour = self.get_colour(self.grid[i][j])
                     surface.fill(colour, (i*self.acc, j*self.acc, self.acc, self.acc))
-            surface = pygame.transform.scale(surface, (self.size.x, self.size.y))
-
-            #surface.scroll(int(self.size.x / len(self.grid) * (len(self.grid) / 2 - self.centre.x)), int(self.size.y / len(self.grid[0])*(len(self.grid[0]) / 2 - self.centre.y)))
+            surface = pygame.transform.scale(surface, (int(self.size.x * self.zoom), int(self.size.y * self.zoom)))
 
             #determines what part of the map is visible
-            x_left = self.centre.x - len(self.grid) / 2
-            x_right = self.centre.x + len(self.grid) / 2
-            y_top = self.centre.y - len(self.grid[0]) / 2
-            y_bottom = self.centre.y + len(self.grid[0]) / 2
+            x_left = self.centre.x - len(self.grid) / (2 * self.zoom)
+            x_right = self.centre.x + len(self.grid) / (2 * self.zoom)
+            y_top = self.centre.y - len(self.grid[0]) / (2 * self.zoom)
+            y_bottom = self.centre.y + len(self.grid[0]) / (2 * self.zoom)
 
             if x_left < 0:
                 x_left = 0
@@ -125,18 +133,31 @@ class Gridview(Entity):
             if y_bottom > len(self.grid[0]):
                 y_bottom = len(self.grid[0])
 
-            x_size = int((x_right - x_left)*self.size.x / len(self.grid))
-            y_size = int((y_bottom - y_top)*self.size.y / len(self.grid[0]))
-            x_left = x_left * self.size.x / len(self.grid)
-            y_top = y_top * self.size.y / len(self.grid[0])
-            x_right = x_right * self.size.x / len(self.grid)
-            y_bottom = y_bottom * self.size.y / len(self.grid[0])
-            new_delta = basics.Coords([self.size.x - x_right, self.size.y - y_bottom])
+            tile_size_x = self.size.x * self.zoom / len(self.grid)
+            tile_size_y = self.size.y * self.zoom / len(self.grid[0])
+            x_size = int((x_right - x_left)*tile_size_x)
+            y_size = int((y_bottom - y_top)*tile_size_y)
+            x_left = x_left * tile_size_x
+            y_top = y_top * tile_size_y
+            x_right = x_right * tile_size_x
+            y_bottom = y_bottom * tile_size_y
+
+            #calculatin delta due to zoom and pan
+            d_x = self.size.x * (1 - self.zoom) - x_right
+            d_y = self.size.y * (1 - self.zoom) - y_bottom
+
+            if d_x < 0:
+                d_x = 0
+            if d_y < 0:
+                d_y = 0
+            new_delta = basics.Coords([d_x, d_y])
 
             new_surf = pygame.Surface((x_size, y_size))
             new_surf.blit(surface, (0, 0), (x_left, y_top, x_size, y_size))
 
-            display.blit(new_surf, (delta.x + new_delta.x, delta.y + new_delta.y))
+
+
+            display.blit(new_surf, (delta.x + loc.x + new_delta.x, delta.y + loc.y + new_delta.y))
 
     def get_colour(self, t_dict):
         if "red" in t_dict or "green" in t_dict or "blue" in t_dict:

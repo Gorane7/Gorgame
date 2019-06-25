@@ -5,13 +5,13 @@ size = (700,500)
 
 game = game.Game(size)
 
-game.add_map([25,25], "test")
+game.add_map([10,10], "test")
 game.maps["test"].fill_random("red", 0, 1)
 game.maps["test"].fill_random("green", 0, 1)
 game.maps["test"].fill_random("blue", 0, 1)
 
 game.screen.window.add_component([0, 0], [500, 500], "white", 5, "display", window = True)
-game.screen.window.get("display").add_component([0, 0], [500, 500], "brown", 5, "map", gridview = True)
+game.screen.window.get("display").add_component([50, 50], [400, 400], "brown", 5, "map", gridview = True)
 game.screen.window.get("display").get("map").add_grid(game.maps["test"].data)
 
 game.screen.window.add_component([500, 0], [200, 500], "grey", 10, "data", window = True)
