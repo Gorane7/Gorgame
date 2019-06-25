@@ -88,7 +88,7 @@ class Gridview(Entity):
         self.grid_size = basics.Coords([self.size.x / len(self.grid), self.size.y / len(self.grid[0])])
 
     def centre_move(self, mouse_move):
-        self.centre = self.centre.add(basics.Coords([ - mouse_move.x * self.zoom / self.grid_size.x,  - mouse_move.y * self.zoom / self.grid_size.y]))
+        self.centre = self.centre.add(basics.Coords([ - mouse_move.x / (self.grid_size.x * self.zoom),  - mouse_move.y / (self.grid_size.y * self.zoom)]))
 
     def zoom_in(self):
         self.zoom *= 1.1
