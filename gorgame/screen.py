@@ -143,12 +143,14 @@ class Gridview(Entity):
             y_bottom = y_bottom * tile_size_y
 
             #calculatin delta due to zoom and pan
-            d_x = self.size.x * (1 - self.zoom) - x_right
-            d_y = self.size.y * (1 - self.zoom) - y_bottom
-
-            if d_x < 0:
+            if x_left == 0:
+                d_x = self.size.x * (1 - self.zoom) / 2 + (len(self.grid) / 2 - self.centre.x) * tile_size_x
+            else:
                 d_x = 0
-            if d_y < 0:
+
+            if y_top == 0:
+                d_y = self.size.y * (1 - self.zoom) / 2 + (len(self.grid[0]) / 2 - self.centre.y) * tile_size_y
+            else:
                 d_y = 0
             new_delta = basics.Coords([d_x, d_y])
 
