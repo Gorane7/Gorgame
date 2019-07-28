@@ -99,9 +99,6 @@ class Gridview(Entity):
     def draw(self, display, delta, parent):
         size, loc = super().draw(display, delta, parent)
 
-        print(str(self.zoom))
-        print(self.centre)
-
         if self.grid:
             surface = pygame.Surface((len(self.grid)*self.acc, len(self.grid[0])*self.acc))
             for i in range(len(self.grid)):
