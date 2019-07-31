@@ -112,14 +112,20 @@ class Gridview(Entity):
                 for j in range(len(self.grid[i])):
                     colour = self.get_colour(self.grid[i][j])
                     surface.fill(colour, (i*self.acc, j*self.acc, self.acc, self.acc))
-            surface = pygame.transform.scale(surface, (int(self.size.x * self.zoom), int(self.size.y * self.zoom)))
+
+            x = len(self.grid)
+            y = len(self.grid[0])
+            x_tile_size = self.size.x / x
+            y_tile_size = self.size.y / y
+            tile_size = min(x_tile_size, y_tile_size)
+            surface = pygame.transform.scale(surface, (int(tile_size * x * self.zoom), int(tile_size * y * self.zoom)))
+            #surface = pygame.transform.scale(surface, (int(self.size.x * self.zoom), int(self.size.y * self.zoom)))
 
             #determines what part of the map is visible
             x_left = self.centre.x - len(self.grid) / (2 * self.zoom)
             x_right = self.centre.x + len(self.grid) / (2 * self.zoom)
             y_top = self.centre.y - len(self.grid[0]) / (2 * self.zoom)
             y_bottom = self.centre.y + len(self.grid[0]) / (2 * self.zoom)
-
             if x_left < 0:
                 x_left = 0
             if x_left > len(self.grid):
@@ -139,26 +145,38 @@ class Gridview(Entity):
 
             tile_size_x = self.size.x * self.zoom / len(self.grid)
             tile_size_y = self.size.y * self.zoom / len(self.grid[0])
+            #tile_size *= self.zoom
+
             x_size = int((x_right - x_left)*tile_size_x)
             y_size = int((y_bottom - y_top)*tile_size_y)
+            #x_size = int((x_right - x_left) * tile_size)
+            #y_size = int((y_bottom - y_top) * tile_size)
+
             x_left = x_left * tile_size_x
             y_top = y_top * tile_size_y
             x_right = x_right * tile_size_x
             y_bottom = y_bottom * tile_size_y
+            #x_left = x_left * tile_size
+            #y_top = y_top * tile_size
+            #x_right = x_right * tile_size
+            #y_bottom = y_bottom * tile_size
 
-            #calculatin delta due to zoom and pan
+            #calculating delta due to zoom and pan
             if x_left == 0:
                 d_x = self.size.x * (1 - self.zoom) / 2 + (len(self.grid) / 2 - self.centre.x) * tile_size_x
+                #d_x = self.size.x * (1 - self.zoom) / 2 + (len(self.grid) / 2 - self.centre.x) * tile_size
             else:
                 d_x = 0
 
             if y_top == 0:
                 d_y = self.size.y * (1 - self.zoom) / 2 + (len(self.grid[0]) / 2 - self.centre.y) * tile_size_y
+                #d_y = self.size.y * (1 - self.zoom) / 2 + (len(self.grid[0]) / 2 - self.centre.y) * tile_size
             else:
                 d_y = 0
             new_delta = basics.Coords([d_x, d_y])
 
             new_surf = pygame.Surface((x_size, y_size))
+            #new_surf.fill()
             new_surf.blit(surface, (0, 0), (x_left, y_top, x_size, y_size))
 
             display.blit(new_surf, (delta.x + loc.x + new_delta.x, delta.y + loc.y + new_delta.y))

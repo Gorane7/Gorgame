@@ -2,7 +2,7 @@ from gorgame import game
 
 #CONSTANTS
 x = 28
-y=40
+y=18
 map_size = 500
 size = (700,500)
 map_tile_size = map_size / max(x, y)
@@ -17,7 +17,7 @@ game.maps["manor map"].fill_random_tiles("blue", 0, 1)
 game.add_space([x*5, y*5], "manor space")
 
 game.screen.window.add_component([0, 0], [map_size, map_size], "green", 5, "display", window = True)
-game.screen.window.get("display").add_component([(map_size - map_tile_size * x) / 2, (map_size - map_tile_size * y) / 2], [map_tile_size * x, map_tile_size * y], "brown", 5, "map", gridview = True)
+game.screen.window.get("display").add_component([0, 0], [map_size, map_size], "brown", 5, "map", gridview = True)
 game.screen.window.get("display").get("map").add_grid(game.maps["manor map"].tiles)
 
 game.screen.window.add_component([500, 0], [200, 500], "grey", 10, "data", window = True)
