@@ -2,6 +2,7 @@ import pygame
 from gorgame import screen
 from gorgame import basics
 from gorgame import map
+from gorgame import space
 
 
 class Game:
@@ -10,6 +11,7 @@ class Game:
         pygame.init()
         self.screen = screen.Screen(size)
         self.maps = {}
+        self.spaces = {}
         self.mouse_down = False
 
     def loop(self):
@@ -42,6 +44,9 @@ class Game:
 
     def add_map(self, size, name):
         self.maps[name] = map.Map(size)
+
+    def add_space(self, size, name):
+        self.spaces[name] = space.Space(size)
 
     def quit(self):
         pygame.quit()

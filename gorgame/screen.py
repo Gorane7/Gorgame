@@ -81,11 +81,18 @@ class Gridview(Entity):
         Entity.__init__(self, loc, size, colour, height, name)
         self.acc = 25
         self.zoom = 1.0
+        self.grid = None
+        self.space = None
 
     def add_grid(self, grid):
         self.grid = grid
         self.centre = basics.Coords([len(self.grid) / 2, len(self.grid[0]) / 2])
         self.grid_size = basics.Coords([self.size.x / len(self.grid), self.size.y / len(self.grid[0])])
+
+    def add_space(self, space):
+        self.space = space
+        if not self.grid:
+            self.centre = basics.Coords([0, 0])
 
     def centre_move(self, mouse_move):
         self.centre = self.centre.add(basics.Coords([ - mouse_move.x / (self.grid_size.x * self.zoom),  - mouse_move.y / (self.grid_size.y * self.zoom)]))
@@ -154,9 +161,11 @@ class Gridview(Entity):
             new_surf = pygame.Surface((x_size, y_size))
             new_surf.blit(surface, (0, 0), (x_left, y_top, x_size, y_size))
 
-
-
             display.blit(new_surf, (delta.x + loc.x + new_delta.x, delta.y + loc.y + new_delta.y))
+
+        if self.space:
+            surface = pygame.Surface(self.space.size.x * self.acc, self.space.size.y * self.acc)
+            pass
 
     def get_colour(self, t_dict):
         if "red" in t_dict or "green" in t_dict or "blue" in t_dict:
