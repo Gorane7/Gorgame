@@ -82,17 +82,12 @@ class Gridview(Entity):
         self.acc = 25
         self.zoom = 1.0
         self.grid = None
-        self.space = None
 
     def add_grid(self, grid):
         self.grid = grid
         self.centre = basics.Coords([len(self.grid) / 2, len(self.grid[0]) / 2])
         self.grid_size = basics.Coords([self.size.x / len(self.grid), self.size.y / len(self.grid[0])])
-
-    def add_space(self, space):
-        self.space = space
-        if not self.grid:
-            self.centre = basics.Coords([0, 0])
+        self.tile_size = min(self.grid_size.x, self.grid_size.y)
 
     def centre_move(self, mouse_move):
         self.centre = self.centre.add(basics.Coords([ - mouse_move.x / (self.grid_size.x * self.zoom),  - mouse_move.y / (self.grid_size.y * self.zoom)]))
@@ -115,10 +110,7 @@ class Gridview(Entity):
 
             x = len(self.grid)
             y = len(self.grid[0])
-            x_tile_size = self.size.x / x
-            y_tile_size = self.size.y / y
-            tile_size = min(x_tile_size, y_tile_size)
-            surface = pygame.transform.scale(surface, (int(tile_size * x * self.zoom), int(tile_size * y * self.zoom)))
+            surface = pygame.transform.scale(surface, (int(self.tile_size * x * self.zoom), int(self.tile_size * y * self.zoom)))
             #surface = pygame.transform.scale(surface, (int(self.size.x * self.zoom), int(self.size.y * self.zoom)))
 
             #determines what part of the map is visible
@@ -180,10 +172,6 @@ class Gridview(Entity):
             new_surf.blit(surface, (0, 0), (x_left, y_top, x_size, y_size))
 
             display.blit(new_surf, (delta.x + loc.x + new_delta.x, delta.y + loc.y + new_delta.y))
-
-        if self.space:
-            surface = pygame.Surface(self.space.size.x * self.acc, self.space.size.y * self.acc)
-            pass
 
     def get_colour(self, t_dict):
         if "red" in t_dict or "green" in t_dict or "blue" in t_dict:

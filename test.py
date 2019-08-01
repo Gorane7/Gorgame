@@ -15,6 +15,7 @@ game.maps["manor map"].fill_random_tiles("green", 0, 1)
 game.maps["manor map"].fill_random_tiles("blue", 0, 1)
 
 game.add_space([x*5, y*5], "manor space")
+game.spaces["manor space"].add_agent([22.5, 22.5], 2.5, "red")
 
 game.screen.window.add_component([0, 0], [map_size, map_size], "green", 5, "display", window = True)
 game.screen.window.get("display").add_component([0, 0], [map_size, map_size], "brown", 5, "map", gridview = True)
