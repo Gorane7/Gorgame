@@ -176,7 +176,7 @@ class Gridview(Entity):
             new_delta = basics.Coords([d_x, d_y])
 
             new_surf = pygame.Surface((x_size, y_size))
-            #new_surf.fill()
+            new_surf.fill(self.colour)
             new_surf.blit(surface, (0, 0), (x_left, y_top, x_size, y_size))
 
             display.blit(new_surf, (delta.x + loc.x + new_delta.x, delta.y + loc.y + new_delta.y))
