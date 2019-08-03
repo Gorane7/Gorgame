@@ -98,6 +98,25 @@ class Spaceview(Scrollview):
         self.ratio = ratio
         self.centre = basics.Coords([0.0, 0.0])
 
+    def space_to_pixel(self, space_loc):
+        temp_loc = basics.Coords([space_loc.x * self.zoom / self.ratio, space_loc.y * self.zoom / self.ratio])
+        temp_loc = basics.Coords([temp_loc.x + self.size.x / 2 - self.centre.x * self.zoom / self.ratio, temp_loc.y + self.size.y / 2 - self.centre.y * self.zoom / self.ratio])
+        return temp_loc
+
+    def centre_move(self, mouse_move):
+        self.centre = self.centre.add(basics.Coords([ - mouse_move.x * self.ratio / self.zoom,  - mouse_move.y * self.ratio / self.zoom]))
+
+    def draw(self, display, delta, parent):
+        size, loc = super().draw(display, delta, parent)
+
+        if self.space:
+            surface = pygame.Surface((self.size.x, self.size.y))
+            for agent in self.space.agents:
+                agent_loc = self.space_to_pixel(agent.loc)
+                pygame.draw.circle(surface, colours[agent.colour], (int(agent_loc.x), int(agent_loc.y)), int(agent.radius * self.zoom / self.ratio))
+
+            display.blit(surface, (loc.x,loc.y))
+
 class Gridview(Scrollview):
     def __init__(self, loc, size, colour, height, name):
         Scrollview.__init__(self, loc, size, colour, height, name)
