@@ -22,6 +22,10 @@ game.screen.window.add_component([0, 0], [space_size, space_size], "green", 5, "
 game.screen.window.get("display").add_component([0, 0], [space_size, space_size], "brown", 5, "space", spaceview = True)
 game.screen.window.get("display").get("space").add_space(game.spaces["manor space"], space_per_pixel)
 
+#game.screen.window.add_component([0, 0], [space_size, space_size], "green", 5, "display", window = True)
+#game.screen.window.get("display").add_component([0, 0], [space_size, space_size], "brown", 5, "map", gridview = True)
+#game.screen.window.get("display").get("map").add_grid(game.maps["manor map"].tiles)
+
 game.screen.window.add_component([500, 0], [200, 500], "grey", 10, "data", window = True)
 
 game.screen.window.get("data").add_component([0, 0], [200, 30], "black", 1, "x_coord_box", textbox = True)

@@ -76,10 +76,21 @@ class Entity:
 
         return basics.Coords([x_size, y_size]), basics.Coords([x_loc, y_loc])
 
-class Spaceview(Entity):
+class Scrollview(Entity):
     def __init__(self, loc, size, colour, height, name):
         Entity.__init__(self, loc, size, colour, height, name)
         self.zoom = 1.0
+        self.centre = None
+
+    def zoom_in(self):
+        self.zoom *= 1.1
+
+    def zoom_out(self):
+        self.zoom /= 1.1
+
+class Spaceview(Scrollview):
+    def __init__(self, loc, size, colour, height, name):
+        Scrollview.__init__(self, loc, size, colour, height, name)
         self.space = None
 
     def add_space(self, space, ratio):
@@ -87,11 +98,10 @@ class Spaceview(Entity):
         self.ratio = ratio
         self.centre = basics.Coords([0.0, 0.0])
 
-class Gridview(Entity):
+class Gridview(Scrollview):
     def __init__(self, loc, size, colour, height, name):
-        Entity.__init__(self, loc, size, colour, height, name)
+        Scrollview.__init__(self, loc, size, colour, height, name)
         self.acc = 25
-        self.zoom = 1.0
         self.grid = None
 
     def add_grid(self, grid):
@@ -102,12 +112,6 @@ class Gridview(Entity):
 
     def centre_move(self, mouse_move):
         self.centre = self.centre.add(basics.Coords([ - mouse_move.x / (self.grid_size.x * self.zoom),  - mouse_move.y / (self.grid_size.y * self.zoom)]))
-
-    def zoom_in(self):
-        self.zoom *= 1.1
-
-    def zoom_out(self):
-        self.zoom /= 1.1
 
     def draw(self, display, delta, parent):
         size, loc = super().draw(display, delta, parent)
