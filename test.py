@@ -18,6 +18,7 @@ game = game.Game(size)
 game.add_space([x*5, y*5], "manor space")
 game.spaces["manor space"].add_agent([22.5, 22.5], 2.5, "red")
 game.spaces["manor space"].add_agent([-50, -50], 2.5, "green")
+game.spaces["manor space"].add_wall([-60, 30], [60, -30], 3, "brown")
 
 game.screen.window.add_component([0, 0], [space_size, space_size], "green", 5, "display", window = True)
 game.screen.window.get("display").add_component([0, 0], [space_size, space_size], "brown", 5, "space", spaceview = True)

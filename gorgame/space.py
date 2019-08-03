@@ -10,14 +10,14 @@ class Space:
         self.walls = []
         self.agents = []
 
-    def add_wall(self, start, end, thickness):
-        self.walls.append(Wall(start, end, thickness))
+    def add_wall(self, start, end, thickness, colour):
+        self.walls.append(Wall(start, end, thickness, colour))
 
     def add_agent(self, loc, radius, colour):
         self.agents.append(Agent(loc, radius, colour))
 
 class Wall:
-    def __init__(self, start, end, thickness):
+    def __init__(self, start, end, thickness, colour):
         if isinstance(start, basics.Coords):
             self.start = start
             self.end = end
@@ -25,6 +25,7 @@ class Wall:
             self.start = basics.Coords(start)
             self.end = basics.Coords(end)
         self.thickness = thickness
+        self.colour = colour
 
 class Agent:
     def __init__(self, loc, radius, colour):

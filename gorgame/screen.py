@@ -115,6 +115,11 @@ class Spaceview(Scrollview):
                 agent_loc = self.space_to_pixel(agent.loc)
                 pygame.draw.circle(surface, colours[agent.colour], (int(agent_loc.x), int(agent_loc.y)), int(agent.radius * self.zoom / self.ratio))
 
+            for wall in self.space.walls:
+                start_loc = self.space_to_pixel(wall.start)
+                end_loc = self.space_to_pixel(wall.end)
+                pygame.draw.line(surface, colours[wall.colour], (int(start_loc.x), int(start_loc.y)), (int(end_loc.x), int(end_loc.y)), wall.thickness)
+
             display.blit(surface, (loc.x,loc.y))
 
 class Gridview(Scrollview):
