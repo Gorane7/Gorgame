@@ -2,24 +2,25 @@ from gorgame import game
 
 #CONSTANTS
 x = 28
-y=18
-map_size = 500
+y = 18
+tile_size = 5
+space_size = 500
 size = (700,500)
-map_tile_size = map_size / max(x, y)
+space_per_pixel = (max(x, y) * tile_size) / space_size
 
 game = game.Game(size)
 
-game.add_map([x,y], "manor map")
-game.maps["manor map"].fill_random_tiles("red", 0, 1)
-game.maps["manor map"].fill_random_tiles("green", 0, 1)
-game.maps["manor map"].fill_random_tiles("blue", 0, 1)
+#game.add_map([x,y], "manor map")
+#game.maps["manor map"].fill_random_tiles("red", 0, 1)
+#game.maps["manor map"].fill_random_tiles("green", 0, 1)
+#game.maps["manor map"].fill_random_tiles("blue", 0, 1)
 
 game.add_space([x*5, y*5], "manor space")
 game.spaces["manor space"].add_agent([22.5, 22.5], 2.5, "red")
 
-game.screen.window.add_component([0, 0], [map_size, map_size], "green", 5, "display", window = True)
-game.screen.window.get("display").add_component([0, 0], [map_size, map_size], "brown", 5, "map", gridview = True)
-game.screen.window.get("display").get("map").add_grid(game.maps["manor map"].tiles)
+game.screen.window.add_component([0, 0], [space_size, space_size], "green", 5, "display", window = True)
+game.screen.window.get("display").add_component([0, 0], [space_size, space_size], "brown", 5, "space", spaceview = True)
+game.screen.window.get("display").get("space").add_space(game.spaces["manor space"], space_per_pixel)
 
 game.screen.window.add_component([500, 0], [200, 500], "grey", 10, "data", window = True)
 

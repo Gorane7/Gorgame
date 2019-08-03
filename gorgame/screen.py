@@ -76,6 +76,17 @@ class Entity:
 
         return basics.Coords([x_size, y_size]), basics.Coords([x_loc, y_loc])
 
+class Spaceview(Entity):
+    def __init__(self, loc, size, colour, height, name):
+        Entity.__init__(self, loc, size, colour, height, name)
+        self.zoom = 1.0
+        self.space = None
+
+    def add_space(self, space, ratio):
+        self.space = space
+        self.ratio = ratio
+        self.centre = basics.Coords([0.0, 0.0])
+
 class Gridview(Entity):
     def __init__(self, loc, size, colour, height, name):
         Entity.__init__(self, loc, size, colour, height, name)
@@ -213,13 +224,15 @@ class Window(Entity):
         Entity.__init__(self, loc, size, colour, height, name)
         self.components = []
 
-    def add_component(self, loc, size, colour, height, name, window = False, textbox = False, gridview = False):
+    def add_component(self, loc, size, colour, height, name, window = False, textbox = False, gridview = False, spaceview = False):
         if window:
             self.components.append(Window(loc, size, colours[colour], height, name))
         elif textbox:
             self.components.append(Textbox(loc, size, colours[colour], height, name))
         elif gridview:
             self.components.append(Gridview(loc, size, colours[colour], height, name))
+        elif spaceview:
+            self.components.append(Spaceview(loc, size, colours[colour], height, name))
         else:
             self.components.append(Entity(loc, size, colours[colour], height, name))
         self.sort_components()
