@@ -1,4 +1,5 @@
 import pygame
+import math
 from gorgame import basics
 
 #CONSTANTS
@@ -89,14 +90,33 @@ class Scrollview(Entity):
         self.zoom /= 1.1
 
 class Spaceview(Scrollview):
-    def __init__(self, loc, size, colour, height, name):
+    def __init__(self, loc, size, colour, height, name, faction):
         Scrollview.__init__(self, loc, size, colour, height, name)
         self.space = None
+        self.faction = faction
 
     def add_space(self, space, ratio):
         self.space = space
         self.ratio = ratio
         self.centre = basics.Coords([0.0, 0.0])
+        self.update_locs()
+
+    def update_locs(self):
+        self.agent_locs = []
+        self.wall_locs = []
+        for agent in self.space.agents:
+            self.agent_locs.append(self.space_to_pixel(agent.loc))
+
+        for wall in self.space.walls:
+            self.wall_locs.append([self.space_to_pixel(wall.start), self.space_to_pixel(wall.end)])
+
+    def zoom_in(self):
+        super().zoom_in()
+        self.update_locs()
+
+    def zoom_out(self):
+        super().zoom_out()
+        self.update_locs()
 
     def space_to_pixel(self, space_loc):
         temp_loc = basics.Coords([space_loc.x * self.zoom / self.ratio, space_loc.y * self.zoom / self.ratio])
@@ -105,22 +125,45 @@ class Spaceview(Scrollview):
 
     def centre_move(self, mouse_move):
         self.centre = self.centre.add(basics.Coords([ - mouse_move.x * self.ratio / self.zoom,  - mouse_move.y * self.ratio / self.zoom]))
+        self.update_locs()
 
     def draw(self, display, delta, parent):
         size, loc = super().draw(display, delta, parent)
 
         if self.space:
             surface = pygame.Surface((self.size.x, self.size.y))
-            for agent in self.space.agents:
-                agent_loc = self.space_to_pixel(agent.loc)
+            surface.fill(self.colour)
+            for agent, agent_loc in zip(self.space.agents, self.agent_locs):
                 pygame.draw.circle(surface, colours[agent.colour], (int(agent_loc.x), int(agent_loc.y)), int(agent.radius * self.zoom / self.ratio))
 
-            for wall in self.space.walls:
-                start_loc = self.space_to_pixel(wall.start)
-                end_loc = self.space_to_pixel(wall.end)
-                pygame.draw.line(surface, colours[wall.colour], (int(start_loc.x), int(start_loc.y)), (int(end_loc.x), int(end_loc.y)), wall.thickness)
+            for wall, wall_loc in zip(self.space.walls, self.wall_locs):
+                pygame.draw.line(surface, colours[wall.colour], (int(wall_loc[0].x), int(wall_loc[0].y)), (int(wall_loc[1].x), int(wall_loc[1].y)), int(wall.thickness * self.zoom))
 
             display.blit(surface, (loc.x,loc.y))
+            if self.faction:
+                fog = pygame.Surface((self.size.x, self.size.y))
+                fog.set_colorkey((1, 1, 1))
+                for agent, agent_loc in zip(self.space.agents, self.agent_locs):
+                    if agent.faction == self.faction:
+                        #pygame.draw.circle(fog, (1, 1, 1), (int(agent_loc.x), int(agent_loc.y)), int(agent.vision_radius * self.zoom / self.ratio))
+                        sight_angles = []
+                        for i, wall_loc in enumerate(self.wall_locs):
+                            angle = {
+                                "type": "start",
+                                "id": i,
+                                "angle": math.atan2(wall_loc[0].y - agent_loc.y, wall_loc[0].x - agent_loc.x)
+                            }
+                            sight_angles.append(angle)
+                            angle = {
+                                "type": "end",
+                                "id": i,
+                                "angle": math.atan2(wall_loc[1].y - agent_loc.y, wall_loc[1].x - agent_loc.x)
+                            }
+                            sight_angles.append(angle)
+                        sight_angles.sort(key = lambda x : x["angle"])
+                        for angle in sight_angles:
+                            print(angle)
+                display.blit(fog, (loc.x, loc.y))
 
 class Gridview(Scrollview):
     def __init__(self, loc, size, colour, height, name):
@@ -252,7 +295,7 @@ class Window(Entity):
         Entity.__init__(self, loc, size, colour, height, name)
         self.components = []
 
-    def add_component(self, loc, size, colour, height, name, window = False, textbox = False, gridview = False, spaceview = False):
+    def add_component(self, loc, size, colour, height, name, window = False, textbox = False, gridview = False, spaceview = False, faction = False):
         if window:
             self.components.append(Window(loc, size, colours[colour], height, name))
         elif textbox:
@@ -260,7 +303,7 @@ class Window(Entity):
         elif gridview:
             self.components.append(Gridview(loc, size, colours[colour], height, name))
         elif spaceview:
-            self.components.append(Spaceview(loc, size, colours[colour], height, name))
+            self.components.append(Spaceview(loc, size, colours[colour], height, name, faction))
         else:
             self.components.append(Entity(loc, size, colours[colour], height, name))
         self.sort_components()
