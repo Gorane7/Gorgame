@@ -99,11 +99,11 @@ class Spaceview(Scrollview):
 
     def gen_bounding_lines(self):
         lines = []
-        points = [basics.Coords([0, 0]), basics.Coords([self.size.x, 0]), basics.Coords([self.size.x, self.size.y]), basics.Coords([0, self.size.y])]
-        lines.append([points[0], points[1], self.line_from_points(points[0], points[1])])
-        lines.append([points[1], points[2], self.line_from_points(points[1], points[2])])
-        lines.append([points[2], points[3], self.line_from_points(points[2], points[3])])
-        lines.append([points[3], points[0], self.line_from_points(points[3], points[0])])
+        self.corner_points = [basics.Coords([0, 0]), basics.Coords([self.size.x, 0]), basics.Coords([self.size.x, self.size.y]), basics.Coords([0, self.size.y])]
+        lines.append([basics.Coords([self.corner_points[0].x - 1.0, self.corner_points[0].y]), basics.Coords([self.corner_points[1].x + 1.0, self.corner_points[1].y]), self.line_from_points(basics.Coords([self.corner_points[0].x - 1.0, self.corner_points[0].y]), basics.Coords([self.corner_points[1].x + 1.0, self.corner_points[1].y]))])
+        lines.append([basics.Coords([self.corner_points[1].x, self.corner_points[1].y - 1.0]), basics.Coords([self.corner_points[2].x, self.corner_points[2].y + 1.0]), self.line_from_points(basics.Coords([self.corner_points[1].x, self.corner_points[1].y - 1.0]), basics.Coords([self.corner_points[2].x, self.corner_points[2].y + 1.0]))])
+        lines.append([basics.Coords([self.corner_points[2].x + 1.0, self.corner_points[2].y]), basics.Coords([self.corner_points[3].x - 1.0, self.corner_points[3].y]), self.line_from_points(basics.Coords([self.corner_points[2].x + 1.0, self.corner_points[2].y]), basics.Coords([self.corner_points[3].x - 1.0, self.corner_points[3].y]))])
+        lines.append([basics.Coords([self.corner_points[3].x, self.corner_points[3].y + 1.0]), basics.Coords([self.corner_points[0].x, self.corner_points[0].y - 1.0]), self.line_from_points(basics.Coords([self.corner_points[3].x, self.corner_points[3].y + 1.0]), basics.Coords([self.corner_points[0].x, self.corner_points[0].y - 1.0]))])
         return lines
 
     def line_from_points(self, start, end):
@@ -145,6 +145,13 @@ class Spaceview(Scrollview):
             else:
                 is_between = False
         return is_between
+
+    def in_same_sector(self, point, origin, angle):
+        point_angle = math.atan2(point.y - origin.y, point.x - origin.x)
+        angle_d = abs(point_angle - angle)
+        if angle_d < 0.01:
+            return True
+        return False
 
     def closest_point(self, point, points):
         points.sort(key = lambda x : basics.dist(point, x))
@@ -200,16 +207,24 @@ class Spaceview(Scrollview):
             display.blit(surface, (loc.x,loc.y))
             if self.faction:
                 fog = pygame.Surface((self.size.x, self.size.y))
+                walls = pygame.Surface((self.size.x, self.size.y))
                 fog.set_colorkey((1, 1, 1))
+                walls.set_colorkey((1, 1, 1))
                 for agent, agent_loc in zip(self.space.agents, self.agent_locs):
+                    #vision_field = pygame.Surface((self.size.x, self.size.y))
+                    #vision_field.set_colorkey((1, 1, 1))
                     if agent.faction == self.faction:
-                        #pygame.draw.circle(fog, (1, 1, 1), (int(agent_loc.x), int(agent_loc.y)), int(agent.vision_radius * self.zoom / self.ratio))
+                        pygame.draw.circle(fog, (1, 1, 1), (int(agent_loc.x), int(agent_loc.y)), int(agent.vision_radius * self.zoom / self.ratio))
                         sight_angles = []
                         for wall_loc in self.wall_locs:
                             angle = math.atan2(wall_loc[0].y - agent_loc.y, wall_loc[0].x - agent_loc.x)
                             sight_angles.append(angle - self.angle_delta)
                             sight_angles.append(angle + self.angle_delta)
                             angle = math.atan2(wall_loc[1].y - agent_loc.y, wall_loc[1].x - agent_loc.x)
+                            sight_angles.append(angle - self.angle_delta)
+                            sight_angles.append(angle + self.angle_delta)
+                        for corner_point in self.corner_points:
+                            angle = math.atan2(corner_point.y - agent_loc.y, corner_point.x - agent_loc.x)
                             sight_angles.append(angle - self.angle_delta)
                             sight_angles.append(angle + self.angle_delta)
                         sight_angles.sort()
@@ -221,19 +236,19 @@ class Spaceview(Scrollview):
                             line_points = []
                             for wall_data in self.wall_locs:
                                 point = self.get_line_intersection(line[0], wall_data[2])
-                                #check if on wall
-                                if self.is_between(point, wall_data[0], wall_data[1]):
-                                    #check if on the correct side from agent
+
+                                #if self.is_between(point, wall_data[0], wall_data[1]):
+                                if self.in_same_sector(point, agent_loc, line[1]):
                                     line_points.append(point)
                             for bounding_line in self.bounding_lines:
                                 point = self.get_line_intersection(line[0], bounding_line[2])
                                 if self.is_between(point, bounding_line[0], bounding_line[1]):
-                                    #check if on the correct side from agent
-                                    line_points.append(point)
+                                    if self.in_same_sector(point, agent_loc, line[1]):
+                                        line_points.append(point)
                             polygon_points.append([self.closest_point(agent_loc, line_points).x, self.closest_point(agent_loc, line_points).y])
-                        print(polygon_points)
-                        pygame.draw.polygon(fog, (1, 1, 1), polygon_points)
+                        pygame.draw.polygon(walls, (1, 1, 1), polygon_points)
                 display.blit(fog, (loc.x, loc.y))
+                display.blit(walls, (loc.x, loc.y))
 
 class Gridview(Scrollview):
     def __init__(self, loc, size, colour, height, name):

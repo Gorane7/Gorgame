@@ -25,7 +25,7 @@ game.spaces["manor space"].add_wall([-60, 30], [60, -30], 3, "brown")
 game.spaces["manor space"].add_wall([-60, -10], [40, -40], 3, "brown")
 
 game.screen.window.add_component([0, 0], [space_size, space_size], "green", 5, "display", window = True)
-game.screen.window.get("display").add_component([0, 0], [space_size, space_size], "grey", 5, "space", spaceview = True, faction = None)
+game.screen.window.get("display").add_component([0, 0], [space_size, space_size], "grey", 5, "space", spaceview = True, faction = "party")
 game.screen.window.get("display").get("space").add_space(game.spaces["manor space"], space_per_pixel)
 
 #game.screen.window.add_component([0, 0], [space_size, space_size], "green", 5, "display", window = True)
