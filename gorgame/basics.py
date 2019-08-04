@@ -1,4 +1,4 @@
-
+import math
 
 class Coords:
     def __init__(self, loc):
@@ -13,3 +13,6 @@ class Coords:
 
     def add(self, second_coords):
         return Coords([second_coords.x + self.x, second_coords.y + self.y])
+
+def dist(a, b):
+    return math.sqrt((a.x - b.x)**2 + (a.y - b.y)**2)
