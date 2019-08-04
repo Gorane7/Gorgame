@@ -96,6 +96,10 @@ class Spaceview(Scrollview):
         self.faction = faction
         self.bounding_lines = self.gen_bounding_lines()
         self.angle_delta = 0.0000000000001
+        self.a = (0, 0, 1)
+        self.c = (0, 1, 0)
+        self.d = (1, 0, 0)
+        self.e = (0, 0, 0)
 
     def gen_bounding_lines(self):
         lines = []
@@ -153,6 +157,11 @@ class Spaceview(Scrollview):
             return True
         return False
 
+    def get_point_away_at_angle(self, start, angle, dist):
+        d_x = math.cos(angle) * dist
+        d_y = math.sin(angle) * dist
+        return basics.Coords([start.x + d_x, start.y + d_y])
+
     def closest_point(self, point, points):
         points.sort(key = lambda x : basics.dist(point, x))
         return points[0]
@@ -205,16 +214,20 @@ class Spaceview(Scrollview):
                 pygame.draw.line(surface, colours[wall.colour], (int(wall_loc[0].x), int(wall_loc[0].y)), (int(wall_loc[1].x), int(wall_loc[1].y)), int(wall.thickness * self.zoom))
 
             display.blit(surface, (loc.x,loc.y))
+            temp_surf = pygame.Surface((self.size.x, self.size.y))
+            temp_surf.fill(self.e)
+            temp_surf.set_colorkey(self.a)
             if self.faction:
-                fog = pygame.Surface((self.size.x, self.size.y))
-                walls = pygame.Surface((self.size.x, self.size.y))
-                fog.set_colorkey((1, 1, 1))
-                walls.set_colorkey((1, 1, 1))
                 for agent, agent_loc in zip(self.space.agents, self.agent_locs):
-                    #vision_field = pygame.Surface((self.size.x, self.size.y))
-                    #vision_field.set_colorkey((1, 1, 1))
                     if agent.faction == self.faction:
-                        pygame.draw.circle(fog, (1, 1, 1), (int(agent_loc.x), int(agent_loc.y)), int(agent.vision_radius * self.zoom / self.ratio))
+                        agent_surf = pygame.Surface((self.size.x, self.size.y))
+                        agent_surf.fill(self.a)
+                        agent_surf.set_colorkey(self.d)
+                        circle_surf = pygame.Surface((self.size.x, self.size.y))
+                        circle_surf.fill(self.d)
+                        circle_surf.set_colorkey(self.c)
+                        pygame.draw.circle(circle_surf, self.c, (int(agent_loc.x), int(agent_loc.y)), int(agent.vision_radius * self.zoom / self.ratio))
+                        agent_surf.blit(circle_surf, (0, 0))
                         sight_angles = []
                         for wall_loc in self.wall_locs:
                             angle = math.atan2(wall_loc[0].y - agent_loc.y, wall_loc[0].x - agent_loc.x)
@@ -237,18 +250,23 @@ class Spaceview(Scrollview):
                             for wall_data in self.wall_locs:
                                 point = self.get_line_intersection(line[0], wall_data[2])
 
-                                #if self.is_between(point, wall_data[0], wall_data[1]):
-                                if self.in_same_sector(point, agent_loc, line[1]):
-                                    line_points.append(point)
-                            for bounding_line in self.bounding_lines:
-                                point = self.get_line_intersection(line[0], bounding_line[2])
-                                if self.is_between(point, bounding_line[0], bounding_line[1]):
+                                if self.is_between(point, wall_data[0], wall_data[1]):
                                     if self.in_same_sector(point, agent_loc, line[1]):
                                         line_points.append(point)
+                            #add point sqrt(2) * self.size away
+                            point = self.get_point_away_at_angle(agent_loc, line[1], max(self.size.x, self.size.y) * math.sqrt(2))
+                            line_points.append(point)
                             polygon_points.append([self.closest_point(agent_loc, line_points).x, self.closest_point(agent_loc, line_points).y])
-                        pygame.draw.polygon(walls, (1, 1, 1), polygon_points)
-                display.blit(fog, (loc.x, loc.y))
-                display.blit(walls, (loc.x, loc.y))
+                        #pygame.draw.polygon(walls, (1, 1, 1), polygon_points)
+                        wall_surf = pygame.Surface((self.size.x, self.size.y))
+                        wall_surf.fill(self.d)
+                        wall_surf.set_colorkey(self.c)
+                        pygame.draw.polygon(wall_surf, self.c, polygon_points)
+                        agent_surf.blit(wall_surf, (0, 0))
+                        temp_surf.blit(agent_surf, (loc.x, loc.y))
+                display.blit(temp_surf, (loc.x, loc.y))
+                #display.blit(fog, (loc.x, loc.y))
+                #display.blit(walls, (loc.x, loc.y))
 
 class Gridview(Scrollview):
     def __init__(self, loc, size, colour, height, name):
