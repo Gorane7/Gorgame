@@ -37,8 +37,14 @@ class Screen:
 
 class Entity:
     def __init__(self, loc, size, colour, height, name):
-        self.loc = basics.Coords([loc[0], loc[1]])
-        self.size = basics.Coords([size[0], size[1]])
+        if isinstance(loc, basics.Coords):
+            self.loc = loc
+        else:
+            self.loc = basics.Coords([loc[0], loc[1]])
+        if isinstance(size, basics.Coords):
+            self.size = size
+        else:
+            self.size = basics.Coords([size[0], size[1]])
         self.colour = colour
         self.height = height
         self.name = name
