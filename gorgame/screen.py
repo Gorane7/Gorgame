@@ -79,7 +79,8 @@ class Entity:
             y_size += self.loc.y
         else:
             y_loc = self.loc.y + delta.y
-        display.fill(self.colour, (x_loc, y_loc, x_size, y_size))
+        if self.colour:
+            display.fill(self.colour, (x_loc, y_loc, x_size, y_size))
 
         return basics.Coords([x_size, y_size]), basics.Coords([x_loc, y_loc])
 
@@ -212,7 +213,11 @@ class Spaceview(Scrollview):
 
         if self.space:
             surface = pygame.Surface((self.size.x, self.size.y))
-            surface.fill(self.colour)
+            if self.colour:
+                surface.fill(self.colour)
+            else:
+                surface.fill(self.a)
+                surface.set_colorkey(self.a)
             for agent, agent_loc in zip(self.space.agents, self.agent_locs):
                 pygame.draw.circle(surface, colours[agent.colour], (int(agent_loc.x), int(agent_loc.y)), int(agent.radius * self.zoom / self.ratio))
 
@@ -404,17 +409,21 @@ class Window(Entity):
         Entity.__init__(self, loc, size, colour, height, name)
         self.components = []
 
-    def add_component(self, loc, size, colour, height, name, window = False, textbox = False, gridview = False, spaceview = False, faction = False):
-        if window:
-            self.components.append(Window(loc, size, colours[colour], height, name))
-        elif textbox:
-            self.components.append(Textbox(loc, size, colours[colour], height, name))
-        elif gridview:
-            self.components.append(Gridview(loc, size, colours[colour], height, name))
-        elif spaceview:
-            self.components.append(Spaceview(loc, size, colours[colour], height, name, faction))
+    def add_component(self, loc, size, height, name, background = None, window = False, textbox = False, gridview = False, spaceview = False, faction = False):
+        if background:
+            colour = colours[background]
         else:
-            self.components.append(Entity(loc, size, colours[colour], height, name))
+            colour = background
+        if window:
+            self.components.append(Window(loc, size, colour, height, name))
+        elif textbox:
+            self.components.append(Textbox(loc, size, colour, height, name))
+        elif gridview:
+            self.components.append(Gridview(loc, size, colour, height, name))
+        elif spaceview:
+            self.components.append(Spaceview(loc, size, colour, height, name, faction))
+        else:
+            self.components.append(Entity(loc, size, colour, height, name))
         self.sort_components()
 
     def sort_components(self):
@@ -426,14 +435,18 @@ class Window(Entity):
                 return component
 
     def get_current_entity(self, pos):
+        to_return = []
         for component in reversed(self.components):
             if component.contains(pos):
                 if isinstance(component, Window):
                     return component.get_current_entity(basics.Coords([pos.x - component.loc.x, pos.y - component.loc.y]))
-                return component
+                if component.colour:
+                    to_return.append(component)
+                    return to_return
+                to_return.append(component)
         if self.name == "main window":
-            return None
-        return self
+            return [None]
+        return [self]
 
     def get_current_window(self, pos):
         for component in reversed(self.components):
