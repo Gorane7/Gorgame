@@ -1,4 +1,6 @@
 from gorgame import game
+from gorgame import basics
+import random
 
 #CONSTANTS
 x = 28
@@ -32,12 +34,27 @@ game.screen.window.get("display").get("space").add_space(game.spaces["manor spac
 game.screen.window.get("display").add_component([0, 0], [space_size, space_size], 4, "map", background = "brown", gridview = True)
 game.screen.window.get("display").get("map").add_grid(game.maps["manor map"].tiles)
 
-game.screen.window.add_component([500, 0], [200, 500], 10, "data", background = "blue", window = True)
+game.screen.window.add_component([500, 0], [200, 500], 10, "data", background = "teal", window = True)
 
 game.screen.window.get("data").add_component([0, 0], [200, 30], 1, "x_coord_box", background = "black", textbox = True)
 game.screen.window.get("data").add_component([0, 30], [200, 30], 1, "y_coord_box", background = "black", textbox = True)
 game.screen.window.get("data").add_component([0, 60], [200, 30], 1, "current_entity", background = "black", textbox = True)
 game.screen.window.get("data").add_component([0, 90], [200, 30], 1, "current_window", background = "black", textbox = True)
+game.screen.window.get("data").add_component([0, 120], [200, 30], 1, "move_random", background = "blue", button = True)
+game.screen.window.get("data").get("move_random").add_text("Move", "green")
+
+def my_loop():
+    if game.screen.window.get("data").get("move_random").pressed:
+        move_random()
+
+def move_random():
+    target = random.randint(0, len(game.spaces["manor space"].agents) - 1)
+    x_dir = random.random() * tile_size * 2 - tile_size
+    y_dir = random.random() * tile_size * 2 - tile_size
+    game.spaces["manor space"].agents[target].loc.add(basics.Coords([x_dir, y_dir]))
+    game.screen.window.get("display").get("space").space.agents[target].loc.add(basics.Coords([x_dir, y_dir]))
+    game.screen.window.get("display").get("space").update_locs()
+    #game.screen.window.get("display").get("space").add_space(game.spaces["manor space"], space_per_pixel)
 
 while True:
     game.screen.window.get("data").get("x_coord_box").add_text("x: " + str(game.screen.mouse_pos.x), "red")
@@ -45,3 +62,4 @@ while True:
     game.screen.window.get("data").get("current_entity").add_text(str(game.screen.current_entity), "red")
     game.screen.window.get("data").get("current_window").add_text(str(game.screen.current_window), "red")
     game.loop()
+    my_loop()

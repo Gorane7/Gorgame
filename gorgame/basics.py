@@ -9,10 +9,12 @@ class Coords:
         return str([self.x, self.y])
 
     def subtract(self, second_coords):
-        return Coords([second_coords.x - self.x, second_coords.y - self.y])
+        self.x -= second_coords.x
+        self.y -= second_coords.y
 
     def add(self, second_coords):
-        return Coords([second_coords.x + self.x, second_coords.y + self.y])
+        self.x += second_coords.x
+        self.y += second_coords.y
 
 def dist(a, b):
     return math.sqrt((a.x - b.x)**2 + (a.y - b.y)**2)

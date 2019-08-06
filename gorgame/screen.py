@@ -192,12 +192,14 @@ class Spaceview(Scrollview):
             self.wall_locs.append([start, end, line])
 
     def zoom_in(self):
-        super().zoom_in()
-        self.update_locs()
+        if self.space:
+            super().zoom_in()
+            self.update_locs()
 
     def zoom_out(self):
-        super().zoom_out()
-        self.update_locs()
+        if self.space:
+            super().zoom_out()
+            self.update_locs()
 
     def space_to_pixel(self, space_loc):
         temp_loc = basics.Coords([space_loc.x * self.zoom / self.ratio, space_loc.y * self.zoom / self.ratio])
@@ -205,8 +207,9 @@ class Spaceview(Scrollview):
         return temp_loc
 
     def centre_move(self, mouse_move):
-        self.centre = self.centre.add(basics.Coords([ - mouse_move.x * self.ratio / self.zoom,  - mouse_move.y * self.ratio / self.zoom]))
-        self.update_locs()
+        if self.space:
+            self.centre.add(basics.Coords([ - mouse_move.x * self.ratio / self.zoom,  - mouse_move.y * self.ratio / self.zoom]))
+            self.update_locs()
 
     def draw(self, display, delta, parent):
         size, loc = super().draw(display, delta, parent)
@@ -292,7 +295,7 @@ class Gridview(Scrollview):
         self.tile_size = min(self.grid_size.x, self.grid_size.y)
 
     def centre_move(self, mouse_move):
-        self.centre = self.centre.add(basics.Coords([ - mouse_move.x / (self.grid_size.x * self.zoom),  - mouse_move.y / (self.grid_size.y * self.zoom)]))
+        self.centre.add(basics.Coords([ - mouse_move.x / (self.grid_size.x * self.zoom),  - mouse_move.y / (self.grid_size.y * self.zoom)]))
 
     def draw(self, display, delta, parent):
         size, loc = super().draw(display, delta, parent)
@@ -404,12 +407,17 @@ class Textbox(Entity):
                 y_text = loc.y + (size.y - text_surf.get_height()) // 2
                 display.blit(text_surf, (x_text, y_text))
 
+class Button(Textbox):
+    def __init__(self, loc, size, colour, height, name):
+        Textbox.__init__(self, loc, size, colour, height, name)
+        self.pressed = False
+
 class Window(Entity):
     def __init__(self, loc, size, colour, height, name):
         Entity.__init__(self, loc, size, colour, height, name)
         self.components = []
 
-    def add_component(self, loc, size, height, name, background = None, window = False, textbox = False, gridview = False, spaceview = False, faction = False):
+    def add_component(self, loc, size, height, name, background = None, window = False, textbox = False, button = False, gridview = False, spaceview = False, faction = False):
         if background:
             colour = colours[background]
         else:
@@ -418,6 +426,8 @@ class Window(Entity):
             self.components.append(Window(loc, size, colour, height, name))
         elif textbox:
             self.components.append(Textbox(loc, size, colour, height, name))
+        elif button:
+            self.components.append(Button(loc, size, colour, height, name))
         elif gridview:
             self.components.append(Gridview(loc, size, colour, height, name))
         elif spaceview:
@@ -456,6 +466,13 @@ class Window(Entity):
         if self.name == "main window":
             return None
         return self
+
+    def reset(self):
+        for component in self.components:
+            if isinstance(component, Window):
+                component.reset()
+            elif isinstance(component, Button):
+                component.pressed = False
 
     def draw(self, display, delta, parent):
         size, loc = super().draw(display, delta, parent)

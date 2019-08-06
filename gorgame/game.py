@@ -15,9 +15,13 @@ class Game:
         self.mouse_down = False
 
     def loop(self):
+        self.reset()
         self.event_handle()
         self.screen.draw()
         self.clock.tick(30)
+
+    def reset(self):
+        self.screen.window.reset()
 
     def event_handle(self):
         for event in pygame.event.get():
@@ -25,7 +29,8 @@ class Game:
                 self.quit()
             elif event.type == pygame.MOUSEMOTION:
                 new_pos = basics.Coords([event.pos[0], event.pos[1]])
-                mouse_move = self.screen.mouse_pos.subtract(new_pos)
+                mouse_move = basics.Coords([new_pos.x, new_pos.y])
+                mouse_move.subtract(self.screen.mouse_pos)
                 self.screen.mouse_pos = new_pos
                 self.screen.current_entity = self.screen.window.get_current_entity(self.screen.mouse_pos)
                 self.screen.current_window = self.screen.window.get_current_window(self.screen.mouse_pos)
@@ -41,6 +46,9 @@ class Game:
                             entity.zoom_in()
                         elif event.button == 5:
                             entity.zoom_out()
+                    if isinstance(entity, screen.Button):
+                        if event.button == 1:
+                            entity.pressed = True
             elif event.type == pygame.MOUSEBUTTONUP:
                 self.mouse_down = False
 
