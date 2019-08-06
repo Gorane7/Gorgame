@@ -41,11 +41,22 @@ game.screen.window.get("data").add_component([0, 30], [200, 30], 1, "y_coord_box
 game.screen.window.get("data").add_component([0, 60], [200, 30], 1, "current_entity", background = "black", textbox = True)
 game.screen.window.get("data").add_component([0, 90], [200, 30], 1, "current_window", background = "black", textbox = True)
 game.screen.window.get("data").add_component([0, 120], [200, 30], 1, "move_random", background = "blue", button = True)
-game.screen.window.get("data").get("move_random").add_text("Move", "green")
+game.screen.window.get("data").get("move_random").change_attributes(text = "Move", colour = "green")
 
 def my_loop():
     if game.screen.window.get("data").get("move_random").pressed:
-        move_random()
+        make_move_inputs()
+
+def make_move_inputs():
+    game.screen.window.get("data").add_component([0, 120], [int(200/3), 30], 1, "unit id", background = "white", input = True)
+    game.screen.window.get("data").add_component([0 + int(200/3), 120], [int(200/3), 30], 1, "move x", background = "white", input = True)
+    game.screen.window.get("data").add_component([0 + int(2*200/3), 120], [int(200/3), 30], 1, "move y", background = "white", input = True)
+    game.screen.window.get("data").get("unit id").change_colours(active = "light grey")
+    game.screen.window.get("data").get("move x").change_colours(active = "light grey")
+    game.screen.window.get("data").get("move y").change_colours(active = "light grey")
+    game.screen.window.get("data").get("unit id").change_default_text("Unit")
+    game.screen.window.get("data").get("move x").change_default_text("x")
+    game.screen.window.get("data").get("move y").change_default_text("y")
 
 def move_random():
     target = random.randint(0, len(game.spaces["manor space"].agents) - 1)
@@ -57,9 +68,9 @@ def move_random():
     #game.screen.window.get("display").get("space").add_space(game.spaces["manor space"], space_per_pixel)
 
 while True:
-    game.screen.window.get("data").get("x_coord_box").add_text("x: " + str(game.screen.mouse_pos.x), "red")
-    game.screen.window.get("data").get("y_coord_box").add_text("y: " + str(game.screen.mouse_pos.y), "red")
-    game.screen.window.get("data").get("current_entity").add_text(str(game.screen.current_entity), "red")
-    game.screen.window.get("data").get("current_window").add_text(str(game.screen.current_window), "red")
+    game.screen.window.get("data").get("x_coord_box").change_attributes(text = "x: " + str(game.screen.mouse_pos.x), colour = "red")
+    game.screen.window.get("data").get("y_coord_box").change_attributes(text = "y: " + str(game.screen.mouse_pos.y), colour = "red")
+    game.screen.window.get("data").get("current_entity").change_attributes(text = str(game.screen.current_entity), colour = "red")
+    game.screen.window.get("data").get("current_window").change_attributes(text = str(game.screen.current_window), colour = "red")
     game.loop()
     my_loop()

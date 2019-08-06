@@ -40,15 +40,21 @@ class Game:
                             entity.centre_move(mouse_move)
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 self.mouse_down = True
-                for entity in self.screen.current_entity:
-                    if isinstance(entity, screen.Scrollview):
-                        if event.button == 4:
-                            entity.zoom_in()
-                        elif event.button == 5:
-                            entity.zoom_out()
-                    if isinstance(entity, screen.Button):
-                        if event.button == 1:
+                if event.button == 1:
+                    for entity in self.screen.current_entity:
+                        if isinstance(entity, screen.Button):
                             entity.pressed = True
+                        if isinstance(entity, screen.Input):
+                            self.screen.window.deactivate_inputs()
+                            entity.activate()
+                if event.button == 4:
+                    for entity in self.screen.current_entity:
+                        if isinstance(entity, screen.Scrollview):
+                            entity.zoom_in()
+                if event.button == 5:
+                    for entity in self.screen.current_entity:
+                        if isinstance(entity, screen.Scrollview):
+                            entity.zoom_out()
             elif event.type == pygame.MOUSEBUTTONUP:
                 self.mouse_down = False
 

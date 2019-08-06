@@ -8,16 +8,18 @@ colours = {
     "green": [0, 220, 0],
     "blue": [0, 0, 255],
     "red": [255, 0, 0],
-    "grey": [127, 127, 127],
     "black": [0, 0, 0],
+    "dark grey": [63, 63, 63],
+    "grey": [127, 127, 127],
+    "light grey": [191, 191, 191],
     "white": [255, 255, 255],
     "yellow": [255, 255, 0],
     "pink": [255, 0, 255],
     "teal": [0, 255, 255],
-    "dark_blue": [0, 0, 127],
-    "dark_teal": [0, 127, 127],
-    "dark_red": [127, 0, 0],
-    "dark_green": [0, 110, 0],
+    "dark blue": [0, 0, 127],
+    "dark teal": [0, 127, 127],
+    "dark red": [127, 0, 0],
+    "dark green": [0, 110, 0],
     "purple": [127, 0, 127],
     "brown": [139, 69, 19]
 }
@@ -386,12 +388,14 @@ class Gridview(Scrollview):
 class Textbox(Entity):
     def __init__(self, loc, size, colour, height, name):
         Entity.__init__(self, loc, size, colour, height, name)
-        self.text = None
-        self.text_colour = None
+        self.text = name
+        self.text_colour = colours["black"]
 
-    def add_text(self, text, colour):
-        self.text = text
-        self.text_colour = colours[colour]
+    def change_attributes(self, text = None, colour = None):
+        if text:
+            self.text = text
+        if colour:
+            self.text_colour = colours[colour]
 
     def draw(self, display, delta, parent):
         size, loc = super().draw(display, delta, parent)
@@ -407,6 +411,32 @@ class Textbox(Entity):
                 y_text = loc.y + (size.y - text_surf.get_height()) // 2
                 display.blit(text_surf, (x_text, y_text))
 
+class Input(Textbox):
+    def __init__(self, loc, size, colour, height, name):
+        Textbox.__init__(self, loc, size, colour, height, name)
+        self.default_text = name
+        self.active = False
+        self.passive_colour = self.colour
+        self.active_colour = (255 - self.passive_colour[0], 255 - self.passive_colour[1], 255 - self.passive_colour[2])
+
+    def change_colours(self, passive = None, active = None):
+        if passive:
+            self.passive_colour = colours[passive]
+        if active:
+            self.active_colour = colours[active]
+
+    def change_default_text(self, text):
+        self.text = text
+        self.default_text = text
+
+    def activate(self):
+        self.active = True
+        self.colour = self.active_colour
+
+    def deactivate(self):
+        self.active = False
+        self.colour = self.passive_colour
+
 class Button(Textbox):
     def __init__(self, loc, size, colour, height, name):
         Textbox.__init__(self, loc, size, colour, height, name)
@@ -417,17 +447,22 @@ class Window(Entity):
         Entity.__init__(self, loc, size, colour, height, name)
         self.components = []
 
-    def add_component(self, loc, size, height, name, background = None, window = False, textbox = False, button = False, gridview = False, spaceview = False, faction = False):
+    def add_component(self, loc, size, height, name, background = None, window = False, textbox = False, button = False, input = False, gridview = False, spaceview = False, faction = False):
         if background:
             colour = colours[background]
         else:
             colour = background
+        for component in self.components:
+            if component.name == name:
+                self.components.remove(component)
         if window:
             self.components.append(Window(loc, size, colour, height, name))
         elif textbox:
             self.components.append(Textbox(loc, size, colour, height, name))
         elif button:
             self.components.append(Button(loc, size, colour, height, name))
+        elif input:
+            self.components.append(Input(loc, size, colour, height, name))
         elif gridview:
             self.components.append(Gridview(loc, size, colour, height, name))
         elif spaceview:
@@ -473,6 +508,13 @@ class Window(Entity):
                 component.reset()
             elif isinstance(component, Button):
                 component.pressed = False
+
+    def deactivate_inputs(self):
+        for component in self.components:
+            if isinstance(component, Window):
+                component.deactivate_inputs()
+            elif isinstance(component, Input):
+                component.deactivate()
 
     def draw(self, display, delta, parent):
         size, loc = super().draw(display, delta, parent)
