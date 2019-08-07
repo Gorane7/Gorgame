@@ -384,6 +384,8 @@ class Gridview(Scrollview):
             if "blue" in t_dict:
                 colour[2] = int(t_dict["blue"]*256)
             return colour
+        if "rgb" in t_dict:
+            return t_dict["rgb"]
 
 class Textbox(Entity):
     def __init__(self, loc, size, colour, height, name):

@@ -20,6 +20,18 @@ class Map:
             array = self.tiles
         for i in range(len(array)):
             if isinstance(array[i], list):
-                self.fill_random_tiles(name, min, max, array[i])
+                self.fill_random_tiles(name, min, max, array = array[i])
             else:
                 array[i][name] = random.uniform(min, max)
+
+    def fill_chessboard_pattern(self, array = None, current = 0):
+        if not array:
+            array = self.tiles
+        for i in range(len(array)):
+            if isinstance(array[i], list):
+                self.fill_chessboard_pattern(array = array[i], current = current + i)
+            else:
+                if (current + i) % 2 == 0:
+                    array[i]["rgb"] = [0, 0, 0]
+                else (current + i) % 2 == 1:
+                    array[i]["rgb"] = [255, 255, 255]
