@@ -44,6 +44,18 @@ game.screen.window.get("data").add_component([0, 120], [200, 30], 1, "move_rando
 game.screen.window.get("data").get("move_random").change_attributes(text = "Move", colour = "green")
 
 def my_loop():
+    if game.output:
+        unit, x, y = None, None, None
+        for key, value in game.output.items():
+            if key == "unit id":
+                unit = value
+            if key == "move x":
+                x = value
+            if key == "move y":
+                y = value
+        if unit and x and y:
+            move(int(game.output["unit id"]), int(game.output["move x"]), int(game.output["move y"]))
+        remove_move_inputs()
     if game.screen.window.get("data").get("move_random").pressed:
         make_move_inputs()
 
@@ -58,14 +70,21 @@ def make_move_inputs():
     game.screen.window.get("data").get("move x").change_default_text("x")
     game.screen.window.get("data").get("move y").change_default_text("y")
 
+def remove_move_inputs():
+    game.screen.window.get("data").remove("unit id")
+    game.screen.window.get("data").remove("move x")
+    game.screen.window.get("data").remove("move y")
+
 def move_random():
     target = random.randint(0, len(game.spaces["manor space"].agents) - 1)
     x_dir = random.random() * tile_size * 2 - tile_size
     y_dir = random.random() * tile_size * 2 - tile_size
-    game.spaces["manor space"].agents[target].loc.add(basics.Coords([x_dir, y_dir]))
-    game.screen.window.get("display").get("space").space.agents[target].loc.add(basics.Coords([x_dir, y_dir]))
+    move(target, x_dir, y_dir)
+
+def move(unit, x, y):
+    game.spaces["manor space"].agents[unit].loc.add(basics.Coords([x, y]))
+    game.screen.window.get("display").get("space").space.agents[unit].loc.add(basics.Coords([x, y]))
     game.screen.window.get("display").get("space").update_locs()
-    #game.screen.window.get("display").get("space").add_space(game.spaces["manor space"], space_per_pixel)
 
 while True:
     game.screen.window.get("data").get("x_coord_box").change_attributes(text = "x: " + str(game.screen.mouse_pos.x), colour = "red")

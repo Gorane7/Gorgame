@@ -13,6 +13,7 @@ class Game:
         self.maps = {}
         self.spaces = {}
         self.mouse_down = False
+        self.output = None
 
     def loop(self):
         self.reset()
@@ -22,6 +23,7 @@ class Game:
 
     def reset(self):
         self.screen.window.reset()
+        self.output = None
 
     def event_handle(self):
         for event in pygame.event.get():
@@ -40,12 +42,12 @@ class Game:
                             entity.centre_move(mouse_move)
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 self.mouse_down = True
+                self.screen.window.deactivate_inputs()
                 if event.button == 1:
                     for entity in self.screen.current_entity:
                         if isinstance(entity, screen.Button):
                             entity.pressed = True
                         if isinstance(entity, screen.Input):
-                            self.screen.window.deactivate_inputs()
                             entity.activate()
                 if event.button == 4:
                     for entity in self.screen.current_entity:
@@ -57,6 +59,16 @@ class Game:
                             entity.zoom_out()
             elif event.type == pygame.MOUSEBUTTONUP:
                 self.mouse_down = False
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_BACKSPACE:
+                    self.screen.window.remove_last_from_active()
+                elif event.key == pygame.K_CAPSLOCK or event.key == pygame.K_RSHIFT or event.key == pygame.K_LSHIFT:
+                    pass
+                elif event.key == pygame.K_RETURN:
+                    self.output = self.screen.window.get_inputs()
+                else:
+                    letter = event.unicode
+                    self.screen.window.add_letter_to_active(letter)
 
     def add_map(self, size, name):
         self.maps[name] = map.Map(size)

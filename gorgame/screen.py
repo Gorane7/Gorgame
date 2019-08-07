@@ -415,9 +415,15 @@ class Input(Textbox):
     def __init__(self, loc, size, colour, height, name):
         Textbox.__init__(self, loc, size, colour, height, name)
         self.default_text = name
+        self.is_written = False
         self.active = False
         self.passive_colour = self.colour
         self.active_colour = (255 - self.passive_colour[0], 255 - self.passive_colour[1], 255 - self.passive_colour[2])
+
+    def reset(self):
+        self.is_written = False
+        self.deactivate()
+        self.text = self.default_text
 
     def change_colours(self, passive = None, active = None):
         if passive:
@@ -436,6 +442,17 @@ class Input(Textbox):
     def deactivate(self):
         self.active = False
         self.colour = self.passive_colour
+
+    def add_letter(self, letter):
+        if not self.is_written:
+            self.is_written = True
+            self.text = letter
+        else:
+            self.text = self.text + letter
+
+    def remove_last(self):
+        if len(self.text) > 0:
+            self.text = self.text[:-1]
 
 class Button(Textbox):
     def __init__(self, loc, size, colour, height, name):
@@ -502,6 +519,11 @@ class Window(Entity):
             return None
         return self
 
+    def remove(self, target):
+        for component in self.components:
+            if component.name == target:
+                self.components.remove(component)
+
     def reset(self):
         for component in self.components:
             if isinstance(component, Window):
@@ -515,6 +537,35 @@ class Window(Entity):
                 component.deactivate_inputs()
             elif isinstance(component, Input):
                 component.deactivate()
+
+    def add_letter_to_active(self, letter):
+        for component in self.components:
+            if isinstance(component, Window):
+                component.add_letter_to_active(letter)
+            elif isinstance(component, Input):
+                if component.active:
+                    component.add_letter(letter)
+
+    def remove_last_from_active(self):
+        for component in self.components:
+            if isinstance(component, Window):
+                component.remove_last_from_active()
+            elif isinstance(component, Input):
+                if component.active:
+                    component.remove_last()
+
+    def get_inputs(self):
+        return_dict = {}
+        for component in self.components:
+            if isinstance(component, Window):
+                this_dict = component.get_inputs()
+                for key, item in this_dict.items():
+                    return_dict[key] = item
+            elif isinstance(component, Input):
+                if component.is_written:
+                    return_dict[component.name] = component.text
+                component.reset()
+        return return_dict
 
     def draw(self, display, delta, parent):
         size, loc = super().draw(display, delta, parent)
