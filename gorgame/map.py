@@ -33,5 +33,5 @@ class Map:
             else:
                 if (current + i) % 2 == 0:
                     array[i]["rgb"] = [0, 0, 0]
-                else (current + i) % 2 == 1:
+                else:
                     array[i]["rgb"] = [255, 255, 255]
