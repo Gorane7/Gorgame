@@ -6,7 +6,7 @@ import random
 x = 28
 y = 18
 tile_size = 5
-space_size = 500
+space_size = 400
 size = (700,500)
 space_per_pixel = (max(x, y) * tile_size) / space_size
 
@@ -26,12 +26,12 @@ game.spaces["manor space"].add_agent([27.5, 42.5], 2.5, "green", faction = "part
 game.spaces["manor space"].add_wall([-60, 30], [60, -30], 3, "brown")
 game.spaces["manor space"].add_wall([-60, -10], [40, -40], 3, "brown")
 
-game.screen.window.add_component([0, 0], [space_size, space_size], 5, "display", background = "green", window = True)
+game.screen.window.add_component([0, 0], [500, 500], 5, "display", background = "green", window = True)
 
-game.screen.window.get("display").add_component([0, 0], [space_size, space_size], 5, "space", spaceview = True, faction = "party")
+game.screen.window.get("display").add_component([50, 50], [space_size, space_size], 5, "space", spaceview = True, faction = None)
 game.screen.window.get("display").get("space").add_space(game.spaces["manor space"], space_per_pixel)
 
-game.screen.window.get("display").add_component([0, 0], [space_size, space_size], 4, "map", background = "brown", gridview = True)
+game.screen.window.get("display").add_component([50, 50], [space_size, space_size], 4, "map", background = "brown", gridview = True)
 game.screen.window.get("display").get("map").add_grid(game.maps["manor map"].tiles)
 
 game.screen.window.add_component([500, 0], [200, 500], 10, "data", background = "teal", window = True)

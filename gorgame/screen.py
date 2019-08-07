@@ -114,9 +114,10 @@ class Spaceview(Scrollview):
         self.clicked = None
 
     def click(self, mouse_pos):
-        click_pos = mouse_pos
+        click_pos = basics.Coords([mouse_pos.x, mouse_pos.y])
         click_pos.subtract(self.loc)
-
+        click_pos = self.pixel_to_space(click_pos)
+        self.clicked = click_pos
 
     def add_space(self, space, ratio):
         self.space = space
@@ -222,7 +223,9 @@ class Spaceview(Scrollview):
         return temp_loc
 
     def pixel_to_space(self, pixel_loc):
-        pass
+        temp_loc = basics.Coords([pixel_loc.x - self.size.x / 2 + self.centre.x * self.zoom / self.ratio, pixel_loc.y - self.size.y / 2 + self.centre.y * self.zoom / self.ratio])
+        temp_loc = basics.Coords([temp_loc.x * self.ratio / self.zoom, temp_loc.y * self.ratio / self.zoom])
+        return temp_loc
 
     def centre_move(self, mouse_move):
         if self.space:
