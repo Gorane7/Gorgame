@@ -102,6 +102,8 @@ class Spaceview(Scrollview):
     def __init__(self, loc, size, colour, height, name, faction):
         Scrollview.__init__(self, loc, size, colour, height, name)
         self.space = None
+        self.ratio = None
+        self.centre = None
         self.faction = faction
         self.bounding_lines = self.gen_bounding_lines()
         self.angle_delta = 0.0000000000001
@@ -109,6 +111,17 @@ class Spaceview(Scrollview):
         self.c = (0, 1, 0)
         self.d = (1, 0, 0)
         self.e = (0, 0, 0)
+
+    def add_space(self, space, ratio):
+        self.space = space
+        self.ratio = ratio
+        self.centre = basics.Coords([0.0, 0.0])
+        self.update_locs()
+
+    def remove_space(self):
+        self.space = None
+        self.ratio = None
+        self.centre = None
 
     def gen_bounding_lines(self):
         lines = []
@@ -174,12 +187,6 @@ class Spaceview(Scrollview):
     def closest_point(self, point, points):
         points.sort(key = lambda x : basics.dist(point, x))
         return points[0]
-
-    def add_space(self, space, ratio):
-        self.space = space
-        self.ratio = ratio
-        self.centre = basics.Coords([0.0, 0.0])
-        self.update_locs()
 
     def update_locs(self):
         self.agent_locs = []
@@ -289,6 +296,15 @@ class Gridview(Scrollview):
         Scrollview.__init__(self, loc, size, colour, height, name)
         self.acc = 25
         self.grid = None
+        self.centre = basics.Coords([0, 0])
+        self.grid_size = basics.Coords([1, 1])
+        self.tile_size = None
+
+    def remove_grid(self):
+        self.grid = None
+        self.centre = basics.Coords([0, 0])
+        self.grid_size = basics.Coords([1, 1])
+        self.tile_size = None
 
     def add_grid(self, grid):
         self.grid = grid
