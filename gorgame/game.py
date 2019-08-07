@@ -49,6 +49,8 @@ class Game:
                             entity.pressed = True
                         if isinstance(entity, screen.Input):
                             entity.activate()
+                        if isinstance(entity, screen.Spaceview):
+                            entity.click(self.screen.mouse_pos)
                 if event.button == 4:
                     for entity in self.screen.current_entity:
                         if isinstance(entity, screen.Scrollview):

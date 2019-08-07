@@ -111,6 +111,12 @@ class Spaceview(Scrollview):
         self.c = (0, 1, 0)
         self.d = (1, 0, 0)
         self.e = (0, 0, 0)
+        self.clicked = None
+
+    def click(self, mouse_pos):
+        click_pos = mouse_pos
+        click_pos.subtract(self.loc)
+
 
     def add_space(self, space, ratio):
         self.space = space
@@ -214,6 +220,9 @@ class Spaceview(Scrollview):
         temp_loc = basics.Coords([space_loc.x * self.zoom / self.ratio, space_loc.y * self.zoom / self.ratio])
         temp_loc = basics.Coords([temp_loc.x + self.size.x / 2 - self.centre.x * self.zoom / self.ratio, temp_loc.y + self.size.y / 2 - self.centre.y * self.zoom / self.ratio])
         return temp_loc
+
+    def pixel_to_space(self, pixel_loc):
+        pass
 
     def centre_move(self, mouse_move):
         if self.space:
@@ -548,6 +557,8 @@ class Window(Entity):
                 component.reset()
             elif isinstance(component, Button):
                 component.pressed = False
+            elif isinstance(component, Spaceview):
+                component.clicked = None
 
     def deactivate_inputs(self):
         for component in self.components:
