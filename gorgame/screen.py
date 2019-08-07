@@ -406,7 +406,7 @@ class Textbox(Entity):
             x_per_letter = int(size.x / (len(self.text) * 0.75))
             text_size = min(size.y, x_per_letter)
             if text_size > 0:
-                text_surf = pygame.transform.scale(text_surf, (int(len(self.text) * text_size * 0.75), text_size))
+                text_surf = pygame.transform.scale(text_surf, (int(len(self.text) * text_size * 0.75), int(text_size)))
                 x_text = loc.x + (size.x - text_surf.get_width()) // 2
                 y_text = loc.y + (size.y - text_surf.get_height()) // 2
                 display.blit(text_surf, (x_text, y_text))
