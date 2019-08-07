@@ -298,7 +298,7 @@ class Spaceview(Scrollview):
                         wall_surf.set_colorkey(self.c)
                         pygame.draw.polygon(wall_surf, self.c, polygon_points)
                         agent_surf.blit(wall_surf, (0, 0))
-                        temp_surf.blit(agent_surf, (loc.x, loc.y))
+                        temp_surf.blit(agent_surf, (0, 0))
                 display.blit(temp_surf, (loc.x, loc.y))
                 #display.blit(fog, (loc.x, loc.y))
                 #display.blit(walls, (loc.x, loc.y))
