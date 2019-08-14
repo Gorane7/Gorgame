@@ -14,6 +14,8 @@ class Game:
         self.spaces = {}
         self.mouse_down = False
         self.output = None
+        self.default_map = None
+        self.default_space = None
 
     def loop(self):
         self.reset()
@@ -72,11 +74,41 @@ class Game:
                     letter = event.unicode
                     self.screen.window.add_letter_to_active(letter)
 
-    def add_map(self, size, name):
+    def add_map(self, size, name, default = False):
         self.maps[name] = map.Map(size)
+        if default or not self.default_map:
+            self.default_map = name
 
-    def add_space(self, size, name):
+    def fill_map(self, type, colour = "greyscale", span = [0, 1]):
+        if not self.default_map:
+            return "There is no default map"
+        if type == "random tiles":
+            self.maps[self.default_map].fill_random_tiles(colour, span[0], span[1])
+
+    def add_space(self, size, name, default = False, default_agent_radius = None, default_faction = None, default_colour = None, default_vision_radius = None, default_wall_thickness = None):
         self.spaces[name] = space.Space(size)
+        if default or not self.default_space:
+            self.default_space = name
+        if default_agent_radius:
+            self.spaces[name].default_agent_radius = default_agent_radius
+        if default_faction:
+            self.spaces[name].default_faction = default_faction
+        if default_colour:
+            self.spaces[name].default_colour = default_colour
+        if default_vision_radius:
+            self.spaces[name].default_vision_radius = default_vision_radius
+        if default_wall_thickness:
+            self.spaces[name].default_wall_thickness = default_wall_thickness
+
+    def add_agent(self, loc, radius = None, colour = None, faction = None, vision_radius = None):
+        if not self.default_space:
+            return "There is no default space"
+        self.spaces[self.default_space].add_agent(loc, radius = radius, colour = colour, faction = faction, vision_radius = vision_radius)
+
+    def add_wall(self, start, end, thickness = None, colour = None):
+        if not self.default_space:
+            return "There is no default space"
+        self.spaces[self.default_space].add_wall(start, end, thickness = thickness, colour = colour)
 
     def quit(self):
         pygame.quit()
