@@ -20,6 +20,7 @@ class Game:
     def loop(self):
         self.reset()
         self.event_handle()
+        self.screen.render()
         self.screen.draw()
         self.clock.tick(30)
 

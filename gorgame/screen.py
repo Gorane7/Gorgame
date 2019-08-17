@@ -21,7 +21,8 @@ colours = {
     "dark red": [127, 0, 0],
     "dark green": [0, 110, 0],
     "purple": [127, 0, 127],
-    "brown": [139, 69, 19]
+    "brown": [139, 69, 19],
+    "transparent": [1, 1, 1]
 }
 
 class Screen:
@@ -34,8 +35,11 @@ class Screen:
         self.current_window = None
 
     def draw(self):
-        self.window.draw(self.display, basics.Coords([0,0]), self.window.size)
+        self.display.blit(self.window.image, (0, 0))
         pygame.display.update()
+
+    def render(self):
+        self.window.render()
 
 class Entity:
     def __init__(self, loc, size, colour, height, name):
@@ -59,32 +63,13 @@ class Entity:
     def __str__(self):
         return self.name
 
-    def draw(self, display, delta, parent):
-        if self.loc.x + self.size.x > parent.x:
-            x_size = parent.x - self.loc.x
-        else:
-            x_size = self.size.x
-
-        if self.loc.y + self.size.y > parent.y:
-            y_size = parent.y - self.loc.y
-        else:
-            y_size = self.size.y
-
-        if self.loc.x < 0:
-            x_loc = delta.x
-            x_size += self.loc.x
-        else:
-            x_loc = self.loc.x + delta.x
-
-        if self.loc.y < 0:
-            y_loc = delta.y
-            y_size += self.loc.y
-        else:
-            y_loc = self.loc.y + delta.y
+    def render(self):
+        self.image = pygame.Surface((self.size.x, self.size.y))
         if self.colour:
-            display.fill(self.colour, (x_loc, y_loc, x_size, y_size))
-
-        return basics.Coords([x_size, y_size]), basics.Coords([x_loc, y_loc])
+            self.image.fill(self.colour)
+        else:
+            self.image.fill(colours["transparent"])
+            self.image.set_colorkey(colours["transparent"])
 
 class Scrollview(Entity):
     def __init__(self, loc, size, colour, height, name):
@@ -110,7 +95,7 @@ class Spaceview(Scrollview):
         self.a = (0, 0, 1)
         self.c = (0, 1, 0)
         self.d = (1, 0, 0)
-        self.e = (0, 0, 0)
+        self.e = (0, 0, 2)
         self.clicked = None
 
     def click(self, mouse_pos):
@@ -232,8 +217,8 @@ class Spaceview(Scrollview):
             self.centre.add(basics.Coords([ - mouse_move.x * self.ratio / self.zoom,  - mouse_move.y * self.ratio / self.zoom]))
             self.update_locs()
 
-    def draw(self, display, delta, parent):
-        size, loc = super().draw(display, delta, parent)
+    def render(self):
+        super().render()
 
         if self.space:
             surface = pygame.Surface((self.size.x, self.size.y))
@@ -248,7 +233,7 @@ class Spaceview(Scrollview):
             for wall, wall_loc in zip(self.space.walls, self.wall_locs):
                 pygame.draw.line(surface, colours[wall.colour], (int(wall_loc[0].x), int(wall_loc[0].y)), (int(wall_loc[1].x), int(wall_loc[1].y)), int(wall.thickness * self.zoom))
 
-            display.blit(surface, (loc.x,loc.y))
+            self.image.blit(surface, (0, 0))
             temp_surf = pygame.Surface((self.size.x, self.size.y))
             temp_surf.fill(self.e)
             temp_surf.set_colorkey(self.a)
@@ -292,16 +277,13 @@ class Spaceview(Scrollview):
                             point = self.get_point_away_at_angle(agent_loc, line[1], max(self.size.x, self.size.y) * math.sqrt(2))
                             line_points.append(point)
                             polygon_points.append([self.closest_point(agent_loc, line_points).x, self.closest_point(agent_loc, line_points).y])
-                        #pygame.draw.polygon(walls, (1, 1, 1), polygon_points)
                         wall_surf = pygame.Surface((self.size.x, self.size.y))
                         wall_surf.fill(self.d)
                         wall_surf.set_colorkey(self.c)
                         pygame.draw.polygon(wall_surf, self.c, polygon_points)
                         agent_surf.blit(wall_surf, (0, 0))
                         temp_surf.blit(agent_surf, (0, 0))
-                display.blit(temp_surf, (loc.x, loc.y))
-                #display.blit(fog, (loc.x, loc.y))
-                #display.blit(walls, (loc.x, loc.y))
+                self.image.blit(temp_surf, (0, 0))
 
 class Gridview(Scrollview):
     def __init__(self, loc, size, colour, height, name):
@@ -327,22 +309,19 @@ class Gridview(Scrollview):
     def centre_move(self, mouse_move):
         self.centre.add(basics.Coords([ - mouse_move.x / (self.grid_size.x * self.zoom),  - mouse_move.y / (self.grid_size.y * self.zoom)]))
 
-    def draw(self, display, delta, parent):
-        size, loc = super().draw(display, delta, parent)
+    def render(self):
+        super().render()
 
         if self.grid:
-            surface = pygame.Surface((len(self.grid)*self.acc, len(self.grid[0])*self.acc))
+            surface = pygame.Surface((int((len(self.grid) * self.acc)), int(len(self.grid[0]) * self.acc)))
             for i in range(len(self.grid)):
                 for j in range(len(self.grid[i])):
                     colour = self.get_colour(self.grid[i][j])
                     surface.fill(colour, (i*self.acc, j*self.acc, self.acc, self.acc))
-
             x = len(self.grid)
             y = len(self.grid[0])
             surface = pygame.transform.scale(surface, (int(self.tile_size * x * self.zoom), int(self.tile_size * y * self.zoom)))
-            #surface = pygame.transform.scale(surface, (int(self.size.x * self.zoom), int(self.size.y * self.zoom)))
 
-            #determines what part of the map is visible
             x_left = self.centre.x - len(self.grid) / (2 * self.zoom)
             x_right = self.centre.x + len(self.grid) / (2 * self.zoom)
             y_top = self.centre.y - len(self.grid[0]) / (2 * self.zoom)
@@ -366,32 +345,22 @@ class Gridview(Scrollview):
 
             tile_size_x = self.size.x * self.zoom / len(self.grid)
             tile_size_y = self.size.y * self.zoom / len(self.grid[0])
-            #tile_size *= self.zoom
 
-            x_size = int((x_right - x_left)*tile_size_x)
-            y_size = int((y_bottom - y_top)*tile_size_y)
-            #x_size = int((x_right - x_left) * tile_size)
-            #y_size = int((y_bottom - y_top) * tile_size)
+            x_size = int((x_right - x_left) * tile_size_x)
+            y_size = int((y_bottom - y_top) * tile_size_y)
 
             x_left = x_left * tile_size_x
             y_top = y_top * tile_size_y
             x_right = x_right * tile_size_x
             y_bottom = y_bottom * tile_size_y
-            #x_left = x_left * tile_size
-            #y_top = y_top * tile_size
-            #x_right = x_right * tile_size
-            #y_bottom = y_bottom * tile_size
 
-            #calculating delta due to zoom and pan
             if x_left == 0:
                 d_x = self.size.x * (1 - self.zoom) / 2 + (len(self.grid) / 2 - self.centre.x) * tile_size_x
-                #d_x = self.size.x * (1 - self.zoom) / 2 + (len(self.grid) / 2 - self.centre.x) * tile_size
             else:
                 d_x = 0
 
             if y_top == 0:
                 d_y = self.size.y * (1 - self.zoom) / 2 + (len(self.grid[0]) / 2 - self.centre.y) * tile_size_y
-                #d_y = self.size.y * (1 - self.zoom) / 2 + (len(self.grid[0]) / 2 - self.centre.y) * tile_size
             else:
                 d_y = 0
             new_delta = basics.Coords([d_x, d_y])
@@ -399,6 +368,9 @@ class Gridview(Scrollview):
             new_surf = pygame.Surface((x_size, y_size))
             new_surf.fill(self.colour)
             new_surf.blit(surface, (0, 0), (x_left, y_top, x_size, y_size))
+            self.image.blit(new_surf, (new_delta.x, new_delta.y))
+
+    def draw(self, display, delta, parent):
 
             display.blit(new_surf, (delta.x + loc.x + new_delta.x, delta.y + loc.y + new_delta.y))
 
@@ -427,19 +399,19 @@ class Textbox(Entity):
         if colour:
             self.text_colour = colours[colour]
 
-    def draw(self, display, delta, parent):
-        size, loc = super().draw(display, delta, parent)
+    def render(self):
+        super().render()
 
         if self.text:
             font = pygame.font.SysFont("arial", 200)
             text_surf = font.render(self.text, True, self.text_colour)
-            x_per_letter = int(size.x / (len(self.text) * 0.75))
-            text_size = min(size.y, x_per_letter)
+            x_per_letter = int(self.size.x / (len(self.text) * 0.75))
+            text_size = min(self.size.y, x_per_letter)
             if text_size > 0:
                 text_surf = pygame.transform.scale(text_surf, (int(len(self.text) * text_size * 0.75), int(text_size)))
-                x_text = loc.x + (size.x - text_surf.get_width()) // 2
-                y_text = loc.y + (size.y - text_surf.get_height()) // 2
-                display.blit(text_surf, (x_text, y_text))
+                x_text = (self.size.x - text_surf.get_width()) // 2
+                y_text = (self.size.y - text_surf.get_height()) // 2
+                self.image.blit(text_surf, (x_text, y_text))
 
 class Input(Textbox):
     def __init__(self, loc, size, colour, height, name):
@@ -598,6 +570,12 @@ class Window(Entity):
                     return_dict[component.name] = component.text
                 component.reset()
         return return_dict
+
+    def render(self):
+        super().render()
+        for component in self.components:
+            component.render()
+            self.image.blit(component.image, (component.loc.x, component.loc.y))
 
     def draw(self, display, delta, parent):
         size, loc = super().draw(display, delta, parent)
