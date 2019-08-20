@@ -251,19 +251,19 @@ class Spaceview(Scrollview):
                         sight_angles = []
                         for wall_loc in self.wall_locs:
                             angle = math.atan2(wall_loc[0].y - agent_loc.y, wall_loc[0].x - agent_loc.x)
-                            sight_angles.append(angle - self.angle_delta)
-                            sight_angles.append(angle + self.angle_delta)
+                            sight_angles.append({"angle": angle - self.angle_delta, "type": "wall"})
+                            sight_angles.append({"angle": angle + self.angle_delta, "type": "wall"})
                             angle = math.atan2(wall_loc[1].y - agent_loc.y, wall_loc[1].x - agent_loc.x)
-                            sight_angles.append(angle - self.angle_delta)
-                            sight_angles.append(angle + self.angle_delta)
+                            sight_angles.append({"angle": angle - self.angle_delta, "type": "wall"})
+                            sight_angles.append({"angle": angle + self.angle_delta, "type": "wall"})
                         for corner_point in self.corner_points:
                             angle = math.atan2(corner_point.y - agent_loc.y, corner_point.x - agent_loc.x)
-                            sight_angles.append(angle - self.angle_delta)
-                            sight_angles.append(angle + self.angle_delta)
-                        sight_angles.sort()
+                            sight_angles.append({"angle": angle - self.angle_delta, "type": "corner", "point": corner_point})
+                            sight_angles.append({"angle": angle - self.angle_delta, "type": "corner", "point": corner_point})
+                        sight_angles.sort(key = lambda x: x["angle"])
                         sight_lines = []
                         for angle in sight_angles:
-                            sight_lines.append([self.line_from_point_and_angle(agent_loc, angle), angle])
+                            sight_lines.append([self.line_from_point_and_angle(agent_loc, angle["angle"]), angle])
                         polygon_points = []
                         for line in sight_lines:
                             line_points = []
@@ -271,10 +271,13 @@ class Spaceview(Scrollview):
                                 point = self.get_line_intersection(line[0], wall_data[2])
 
                                 if self.is_between(point, wall_data[0], wall_data[1]):
-                                    if self.in_same_sector(point, agent_loc, line[1]):
+                                    if self.in_same_sector(point, agent_loc, line[1]["angle"]):
                                         line_points.append(point)
                             #add point sqrt(2) * self.size away
-                            point = self.get_point_away_at_angle(agent_loc, line[1], max(self.size.x, self.size.y) * math.sqrt(2))
+                            if line[1]["type"] == "wall":
+                                point = self.get_point_away_at_angle(agent_loc, line[1]["angle"], max(self.size.x, self.size.y) * math.sqrt(2))
+                            else:
+                                point = line[1]["point"]
                             line_points.append(point)
                             polygon_points.append([self.closest_point(agent_loc, line_points).x, self.closest_point(agent_loc, line_points).y])
                         wall_surf = pygame.Surface((self.size.x, self.size.y))
