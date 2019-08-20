@@ -44,8 +44,7 @@ game.screen.window.get("data").add_component([0, 0], [200, 30], "x_coord_box", b
 game.screen.window.get("data").add_component([0, 30], [200, 30], "y_coord_box", background = "black", textbox = True)
 game.screen.window.get("data").add_component([0, 60], [200, 30], "current_entity", background = "black", textbox = True)
 game.screen.window.get("data").add_component([0, 90], [200, 30], "current_window", background = "black", textbox = True)
-game.screen.window.get("data").add_component([0, 120], [200, 30], "move_random", background = "blue", button = True)
-game.screen.window.get("data").get("move_random").change_attributes(text = "Move", colour = "green")
+game.screen.window.get("data").add_component([0, 120], [200, 30], "move_random", background = "blue", button = True, text = "Move", text_colour = "green")
 
 def my_loop():
     if game.output:
@@ -64,15 +63,9 @@ def my_loop():
         make_move_inputs()
 
 def make_move_inputs():
-    game.screen.window.get("data").add_component([0, 120], [int(200/3), 30], "unit id", background = "white", input = True)
-    game.screen.window.get("data").add_component([0 + int(200/3), 120], [int(200/3), 30], "move x", background = "white", input = True)
-    game.screen.window.get("data").add_component([0 + int(2*200/3), 120], [int(200/3), 30], "move y", background = "white", input = True)
-    game.screen.window.get("data").get("unit id").change_colours(active = "light grey")
-    game.screen.window.get("data").get("move x").change_colours(active = "light grey")
-    game.screen.window.get("data").get("move y").change_colours(active = "light grey")
-    game.screen.window.get("data").get("unit id").change_default_text("Unit")
-    game.screen.window.get("data").get("move x").change_default_text("x")
-    game.screen.window.get("data").get("move y").change_default_text("y")
+    game.screen.window.get("data").add_component([0, 120], [int(200/3), 30], "unit id", background = "white", input = True, active_colour = "light grey", text = "Unit")
+    game.screen.window.get("data").add_component([0 + int(200/3), 120], [int(200/3), 30], "move x", background = "white", input = True, active_colour = "light grey", text = "x")
+    game.screen.window.get("data").add_component([0 + int(2*200/3), 120], [int(200/3), 30], "move y", background = "white", input = True, active_colour = "light grey", text = "y")
 
 def remove_move_inputs():
     game.screen.window.get("data").remove("unit id")
