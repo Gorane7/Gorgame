@@ -47,7 +47,7 @@ class Game:
                 self.mouse_down = True
                 self.screen.window.deactivate_inputs()
                 if event.button == 1:
-                    if isinstance(self.screen.current_window, screen.Toggle_view):
+                    if isinstance(self.screen.current_window, screen.Toggleview):
                         self.screen.current_window.untoggle()
                     for entity in self.screen.current_entity:
                         if isinstance(entity, screen.Button):

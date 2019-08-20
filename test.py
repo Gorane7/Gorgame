@@ -45,7 +45,7 @@ game.screen.window.get("data").add_component([0, 30], [200, 30], "y_coord_box", 
 game.screen.window.get("data").add_component([0, 60], [200, 30], "current_entity", background = "black", textbox = True)
 game.screen.window.get("data").add_component([0, 90], [200, 30], "current_window", background = "black", textbox = True)
 game.screen.window.get("data").add_component([0, 120], [200, 30], "move_random", background = "blue", button = True, text = "Move", text_colour = "green")
-game.screen.window.get("data").add_component([0, 150], [200, 30], "view_choice", background = "purple", toggle_view = True, buttons = ["party_button", "goblin_button"], texts = ["Party", "Goblins"], formation = [2, 1], default = "party_button")
+game.screen.window.get("data").add_component([0, 150], [200, 30], "view_choice", background = "purple", toggleview = True, buttons = ["party_button", "goblin_button"], texts = ["Party", "Goblins"], formation = [2, 1], default = "party_button")
 
 def my_loop():
     if game.output:

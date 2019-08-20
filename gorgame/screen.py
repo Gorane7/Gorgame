@@ -478,7 +478,7 @@ class Window(Entity):
         Entity.__init__(self, loc, size, colour, height, name)
         self.components = []
 
-    def add_component(self, loc, size, name, height = 1, background = None, window = False, textbox = False, button = False, input = False, gridview = False, spaceview = False, faction = False, toggle_view = False, text = None, text_colour = None, active_colour = None, buttons = None, texts = None, formation = None, default = None):
+    def add_component(self, loc, size, name, height = 1, background = None, window = False, textbox = False, button = False, input = False, gridview = False, spaceview = False, faction = False, toggleview = False, text = None, text_colour = None, active_colour = None, buttons = None, texts = None, formation = None, default = None):
         if background:
             colour = colours[background]
         else:
@@ -503,8 +503,8 @@ class Window(Entity):
             self.components.append(Gridview(loc, size, colour, height, name))
         elif spaceview:
             self.components.append(Spaceview(loc, size, colour, height, name, faction))
-        elif toggle_view:
-            self.components.append(Toggle_view(loc, size, colour, height, name, buttons, texts, formation, default))
+        elif toggleview:
+            self.components.append(Toggleview(loc, size, colour, height, name, buttons, texts, formation, default))
         else:
             self.components.append(Entity(loc, size, colour, height, name))
         self.sort_components()
@@ -602,7 +602,7 @@ class Window(Entity):
         for component in self.components:
             component.draw(display, basics.Coords([self.loc.x + delta.x, self.loc.y + delta.y]), self.size)
 
-class Toggle_view(Window):
+class Toggleview(Window):
     def __init__(self, loc, size, colour, height, name, buttons, texts, formation, default):
         Window.__init__(self, loc, size, colour, height, name)
         self.add_toggles(buttons, texts, formation)
