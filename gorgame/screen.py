@@ -426,7 +426,7 @@ class Input(Textbox):
         self.is_written = False
         self.active = False
         self.passive_colour = self.colour
-        self.active_colour = (255 - self.passive_colour[0], 255 - self.passive_colour[1], 255 - self.passive_colour[2])
+        self.active_colour = colours["light grey"]
 
     def reset(self):
         self.is_written = False
