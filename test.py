@@ -32,7 +32,7 @@ game.add_wall([-60, -10], [40, -40])
 
 game.screen.window.add_component([0, 0], [500, 500], "display", background = "green", window = True)
 
-game.screen.window.get("display").add_component([50, 50], [space_size, space_size], "space", height = 2, spaceview = True, faction = "goblin")
+game.screen.window.get("display").add_component([50, 50], [space_size, space_size], "space", height = 2, spaceview = True, faction = "party")
 game.screen.window.get("display").get("space").add_space(game.spaces["manor space"], space_per_pixel)
 
 game.screen.window.get("display").add_component([50, 50], [space_size, space_size], "map", background = "brown", gridview = True)
@@ -45,6 +45,7 @@ game.screen.window.get("data").add_component([0, 30], [200, 30], "y_coord_box", 
 game.screen.window.get("data").add_component([0, 60], [200, 30], "current_entity", background = "black", textbox = True)
 game.screen.window.get("data").add_component([0, 90], [200, 30], "current_window", background = "black", textbox = True)
 game.screen.window.get("data").add_component([0, 120], [200, 30], "move_random", background = "blue", button = True, text = "Move", text_colour = "green")
+game.screen.window.get("data").add_component([0, 150], [200, 30], "view_choice", background = "purple", toggle_view = True, buttons = ["party_button", "goblin_button"], texts = ["Party", "Goblins"], formation = [2, 1], default = "party_button")
 
 def my_loop():
     if game.output:
@@ -61,6 +62,13 @@ def my_loop():
         remove_move_inputs()
     if game.screen.window.get("data").get("move_random").pressed:
         make_move_inputs()
+    check_vision_toggle()
+
+def check_vision_toggle():
+    if game.screen.window.get("data").get("view_choice").get("party_button").active:
+        game.screen.window.get("display").get("space").change_faction("party")
+    if game.screen.window.get("data").get("view_choice").get("goblin_button").active:
+        game.screen.window.get("display").get("space").change_faction("goblin")
 
 def make_move_inputs():
     game.screen.window.get("data").add_component([0, 120], [int(200/3), 30], "unit id", background = "white", input = True, text = "Unit")

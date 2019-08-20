@@ -63,6 +63,9 @@ class Entity:
     def __str__(self):
         return self.name
 
+    def __repr__(self):
+        return str(self)
+
     def render(self):
         self.image = pygame.Surface((self.size.x, self.size.y))
         if self.colour:
@@ -98,6 +101,9 @@ class Spaceview(Scrollview):
         self.e = (0, 0, 2)
         self.clicked = None
         self.amount_of_random_rays = 31
+
+    def change_faction(self, faction):
+        self.faction = faction
 
     def click(self, mouse_pos):
         click_pos = basics.Coords([mouse_pos.x, mouse_pos.y])
@@ -376,10 +382,6 @@ class Gridview(Scrollview):
             new_surf.blit(surface, (0, 0), (x_left, y_top, x_size, y_size))
             self.image.blit(new_surf, (new_delta.x, new_delta.y))
 
-    def draw(self, display, delta, parent):
-
-            display.blit(new_surf, (delta.x + loc.x + new_delta.x, delta.y + loc.y + new_delta.y))
-
     def get_colour(self, t_dict):
         if "red" in t_dict or "green" in t_dict or "blue" in t_dict:
             colour = [0, 0, 0]
@@ -419,19 +421,20 @@ class Textbox(Entity):
                 y_text = (self.size.y - text_surf.get_height()) // 2
                 self.image.blit(text_surf, (x_text, y_text))
 
-class Input(Textbox):
+class Toggle(Textbox):
     def __init__(self, loc, size, colour, height, name):
         Textbox.__init__(self, loc, size, colour, height, name)
-        self.default_text = name
-        self.is_written = False
         self.active = False
         self.passive_colour = self.colour
         self.active_colour = colours["light grey"]
 
-    def reset(self):
-        self.is_written = False
-        self.deactivate()
-        self.text = self.default_text
+    def activate(self):
+            self.active = True
+            self.colour = self.active_colour
+
+    def deactivate(self):
+            self.active = False
+            self.colour = self.passive_colour
 
     def change_colours(self, passive = None, active = None):
         if passive:
@@ -439,17 +442,20 @@ class Input(Textbox):
         if active:
             self.active_colour = colours[active]
 
+class Input(Toggle):
+    def __init__(self, loc, size, colour, height, name):
+        Toggle.__init__(self, loc, size, colour, height, name)
+        self.default_text = name
+        self.is_written = False
+
+    def reset(self):
+        self.is_written = False
+        self.deactivate()
+        self.text = self.default_text
+
     def change_default_text(self, text):
         self.text = text
         self.default_text = text
-
-    def activate(self):
-        self.active = True
-        self.colour = self.active_colour
-
-    def deactivate(self):
-        self.active = False
-        self.colour = self.passive_colour
 
     def add_letter(self, letter):
         if not self.is_written:
@@ -472,7 +478,7 @@ class Window(Entity):
         Entity.__init__(self, loc, size, colour, height, name)
         self.components = []
 
-    def add_component(self, loc, size, name, height = 1, background = None, window = False, textbox = False, button = False, input = False, gridview = False, spaceview = False, faction = False, text = None, text_colour = None, active_colour = None):
+    def add_component(self, loc, size, name, height = 1, background = None, window = False, textbox = False, button = False, input = False, gridview = False, spaceview = False, faction = False, toggle_view = False, text = None, text_colour = None, active_colour = None, buttons = None, texts = None, formation = None, default = None):
         if background:
             colour = colours[background]
         else:
@@ -497,6 +503,8 @@ class Window(Entity):
             self.components.append(Gridview(loc, size, colour, height, name))
         elif spaceview:
             self.components.append(Spaceview(loc, size, colour, height, name, faction))
+        elif toggle_view:
+            self.components.append(Toggle_view(loc, size, colour, height, name, buttons, texts, formation, default))
         else:
             self.components.append(Entity(loc, size, colour, height, name))
         self.sort_components()
@@ -527,7 +535,7 @@ class Window(Entity):
         for component in reversed(self.components):
             if isinstance(component, Window):
                 if component.contains(pos):
-                    return component.get_current_window(pos)
+                    return component.get_current_window(basics.Coords([pos.x - component.loc.x, pos.y - component.loc.y]))
         if self.name == "main window":
             return None
         return self
@@ -593,3 +601,27 @@ class Window(Entity):
 
         for component in self.components:
             component.draw(display, basics.Coords([self.loc.x + delta.x, self.loc.y + delta.y]), self.size)
+
+class Toggle_view(Window):
+    def __init__(self, loc, size, colour, height, name, buttons, texts, formation, default):
+        Window.__init__(self, loc, size, colour, height, name)
+        self.add_toggles(buttons, texts, formation)
+        self.get(default).activate()
+
+    def add_toggles(self, buttons, texts, formation):
+        if len(buttons) != len(texts):
+            return "Error: Amount of buttons does not match the amount of texts given"
+        if formation[0] * formation[1] < len(buttons):
+            return "Error: Not enough room in formation for all of the buttons"
+        x_size = self.size.x / formation[0]
+        y_size = self.size.y / formation[1]
+        for i, button_name, text in zip(range(len(buttons)), buttons, texts):
+            x_pos = i % formation[0]
+            y_pos = i // formation[0]
+            self.components.append(Toggle((int(x_pos * x_size), int(y_pos * y_size)), (int(x_size), int(y_size)), self.colour, self.height, button_name))
+            self.get(button_name).change_attributes(text = text)
+
+    def untoggle(self):
+        for component in self.components:
+            if isinstance(component, Toggle):
+                component.deactivate()
