@@ -97,6 +97,7 @@ class Spaceview(Scrollview):
         self.d = (1, 0, 0)
         self.e = (0, 0, 2)
         self.clicked = None
+        self.amount_of_random_rays = 31
 
     def click(self, mouse_pos):
         click_pos = basics.Coords([mouse_pos.x, mouse_pos.y])
@@ -167,6 +168,12 @@ class Spaceview(Scrollview):
     def in_same_sector(self, point, origin, angle):
         point_angle = math.atan2(point.y - origin.y, point.x - origin.x)
         angle_d = abs(point_angle - angle)
+        if angle_d < 0.01:
+            return True
+        angle_d = abs(point_angle - angle - 2 * math.pi)
+        if angle_d < 0.01:
+            return True
+        angle_d = abs(point_angle - angle + 2 * math.pi)
         if angle_d < 0.01:
             return True
         return False
@@ -256,10 +263,9 @@ class Spaceview(Scrollview):
                             angle = math.atan2(wall_loc[1].y - agent_loc.y, wall_loc[1].x - agent_loc.x)
                             sight_angles.append({"angle": angle - self.angle_delta, "type": "wall"})
                             sight_angles.append({"angle": angle + self.angle_delta, "type": "wall"})
-                        for corner_point in self.corner_points:
-                            angle = math.atan2(corner_point.y - agent_loc.y, corner_point.x - agent_loc.x)
-                            sight_angles.append({"angle": angle - self.angle_delta, "type": "corner", "point": corner_point})
-                            sight_angles.append({"angle": angle - self.angle_delta, "type": "corner", "point": corner_point})
+                        for i in range(self.amount_of_random_rays):
+                            angle = math.pi * 2 / self.amount_of_random_rays * i - math.pi
+                            sight_angles.append({"angle": angle, "type": "random"})
                         sight_angles.sort(key = lambda x: x["angle"])
                         sight_lines = []
                         for angle in sight_angles:
@@ -273,11 +279,8 @@ class Spaceview(Scrollview):
                                 if self.is_between(point, wall_data[0], wall_data[1]):
                                     if self.in_same_sector(point, agent_loc, line[1]["angle"]):
                                         line_points.append(point)
-                            #add point sqrt(2) * self.size away
-                            if line[1]["type"] == "wall":
-                                point = self.get_point_away_at_angle(agent_loc, line[1]["angle"], max(self.size.x, self.size.y) * math.sqrt(2))
-                            else:
-                                point = line[1]["point"]
+                            #add point some distance away
+                            point = self.get_point_away_at_angle(agent_loc, line[1]["angle"], agent.vision_radius * 2 * self.zoom / self.ratio)
                             line_points.append(point)
                             polygon_points.append([self.closest_point(agent_loc, line_points).x, self.closest_point(agent_loc, line_points).y])
                         wall_surf = pygame.Surface((self.size.x, self.size.y))
