@@ -30,21 +30,21 @@ game.add_agent([-47.5, -47.5])
 game.add_wall([-60, 30], [60, -30])
 game.add_wall([-60, -10], [40, -40])
 
-game.screen.window.add_component([0, 0], [500, 500], 5, "display", background = "green", window = True)
+game.screen.window.add_component([0, 0], [500, 500], "display", background = "green", window = True)
 
-game.screen.window.get("display").add_component([50, 50], [space_size, space_size], 5, "space", spaceview = True, faction = "goblin")
+game.screen.window.get("display").add_component([50, 50], [space_size, space_size], "space", height = 2, spaceview = True, faction = "goblin")
 game.screen.window.get("display").get("space").add_space(game.spaces["manor space"], space_per_pixel)
 
-game.screen.window.get("display").add_component([50, 50], [space_size, space_size], 4, "map", background = "brown", gridview = True)
+game.screen.window.get("display").add_component([50, 50], [space_size, space_size], "map", background = "brown", gridview = True)
 game.screen.window.get("display").get("map").add_grid(game.maps["manor map"].tiles)
 
-game.screen.window.add_component([500, 0], [200, 500], 10, "data", background = "teal", window = True)
+game.screen.window.add_component([500, 0], [200, 500], "data", background = "teal", window = True)
 
-game.screen.window.get("data").add_component([0, 0], [200, 30], 1, "x_coord_box", background = "black", textbox = True)
-game.screen.window.get("data").add_component([0, 30], [200, 30], 1, "y_coord_box", background = "black", textbox = True)
-game.screen.window.get("data").add_component([0, 60], [200, 30], 1, "current_entity", background = "black", textbox = True)
-game.screen.window.get("data").add_component([0, 90], [200, 30], 1, "current_window", background = "black", textbox = True)
-game.screen.window.get("data").add_component([0, 120], [200, 30], 1, "move_random", background = "blue", button = True)
+game.screen.window.get("data").add_component([0, 0], [200, 30], "x_coord_box", background = "black", textbox = True)
+game.screen.window.get("data").add_component([0, 30], [200, 30], "y_coord_box", background = "black", textbox = True)
+game.screen.window.get("data").add_component([0, 60], [200, 30], "current_entity", background = "black", textbox = True)
+game.screen.window.get("data").add_component([0, 90], [200, 30], "current_window", background = "black", textbox = True)
+game.screen.window.get("data").add_component([0, 120], [200, 30], "move_random", background = "blue", button = True)
 game.screen.window.get("data").get("move_random").change_attributes(text = "Move", colour = "green")
 
 def my_loop():
@@ -64,9 +64,9 @@ def my_loop():
         make_move_inputs()
 
 def make_move_inputs():
-    game.screen.window.get("data").add_component([0, 120], [int(200/3), 30], 1, "unit id", background = "white", input = True)
-    game.screen.window.get("data").add_component([0 + int(200/3), 120], [int(200/3), 30], 1, "move x", background = "white", input = True)
-    game.screen.window.get("data").add_component([0 + int(2*200/3), 120], [int(200/3), 30], 1, "move y", background = "white", input = True)
+    game.screen.window.get("data").add_component([0, 120], [int(200/3), 30], "unit id", background = "white", input = True)
+    game.screen.window.get("data").add_component([0 + int(200/3), 120], [int(200/3), 30], "move x", background = "white", input = True)
+    game.screen.window.get("data").add_component([0 + int(2*200/3), 120], [int(200/3), 30], "move y", background = "white", input = True)
     game.screen.window.get("data").get("unit id").change_colours(active = "light grey")
     game.screen.window.get("data").get("move x").change_colours(active = "light grey")
     game.screen.window.get("data").get("move y").change_colours(active = "light grey")

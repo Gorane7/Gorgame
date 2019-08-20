@@ -472,7 +472,7 @@ class Window(Entity):
         Entity.__init__(self, loc, size, colour, height, name)
         self.components = []
 
-    def add_component(self, loc, size, height, name, background = None, window = False, textbox = False, button = False, input = False, gridview = False, spaceview = False, faction = False):
+    def add_component(self, loc, size, name, height = 1, background = None, window = False, textbox = False, button = False, input = False, gridview = False, spaceview = False, faction = False):
         if background:
             colour = colours[background]
         else:
