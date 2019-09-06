@@ -105,10 +105,10 @@ class Game:
         if default_speed:
             self.spaces[name].default_speed = default_speed
 
-    def add_agent(self, loc, radius = None, colour = None, faction = None, vision_radius = None, speed = None):
+    def add_agent(self, loc, radius = None, colour = None, faction = None, vision_radius = None, speed = None, active_colour = None):
         if not self.default_space:
             return "There is no default space"
-        self.spaces[self.default_space].add_agent(loc, radius = radius, colour = colour, faction = faction, vision_radius = vision_radius, speed = speed)
+        self.spaces[self.default_space].add_agent(loc, radius = radius, colour = colour, faction = faction, vision_radius = vision_radius, speed = speed, active_colour = active_colour)
 
     def add_wall(self, start, end, thickness = None, colour = None):
         if not self.default_space:
