@@ -101,6 +101,7 @@ class Spaceview(Scrollview):
         self.e = (0, 0, 2)
         self.clicked = None
         self.amount_of_random_rays = 31
+        self.active_agent = None
 
     def change_faction(self, faction):
         self.faction = faction
@@ -110,6 +111,13 @@ class Spaceview(Scrollview):
         click_pos.subtract(self.loc)
         click_pos = self.pixel_to_space(click_pos)
         self.clicked = click_pos
+        self.find_if_someone_clicked()
+
+    def find_if_someone_clicked(self):
+        for agent in self.space.agents:
+            if basics.dist(agent.loc, self.clicked) < agent.radius:
+                self.active_agent = agent
+                pass
 
     def add_space(self, space, ratio):
         self.space = space
@@ -241,7 +249,11 @@ class Spaceview(Scrollview):
                 surface.fill(self.a)
                 surface.set_colorkey(self.a)
             for agent, agent_loc in zip(self.space.agents, self.agent_locs):
-                pygame.draw.circle(surface, colours[agent.colour], (int(agent_loc.x), int(agent_loc.y)), int(agent.radius * self.zoom / self.ratio))
+                if agent == self.active_agent:
+                    colour = agent.active_colour
+                else:
+                    colour = agent.colour
+                pygame.draw.circle(surface, colours[colour], (int(agent_loc.x), int(agent_loc.y)), int(agent.radius * self.zoom / self.ratio))
 
             for wall, wall_loc in zip(self.space.walls, self.wall_locs):
                 pygame.draw.line(surface, colours[wall.colour], (int(wall_loc[0].x), int(wall_loc[0].y)), (int(wall_loc[1].x), int(wall_loc[1].y)), int(wall.thickness * self.zoom))

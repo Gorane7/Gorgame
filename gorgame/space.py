@@ -88,4 +88,3 @@ class Agent:
         self.faction = faction
         self.vision_radius = vision_radius
         self.speed = speed
-        self.active = False
