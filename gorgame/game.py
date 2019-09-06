@@ -88,7 +88,7 @@ class Game:
         if type == "random tiles":
             self.maps[self.default_map].fill_random_tiles(colour, span[0], span[1])
 
-    def add_space(self, size, name, default = False, default_agent_radius = None, default_faction = None, default_colour = None, default_vision_radius = None, default_wall_thickness = None):
+    def add_space(self, size, name, default = False, default_agent_radius = None, default_faction = None, default_colour = None, default_vision_radius = None, default_wall_thickness = None, default_speed = None):
         self.spaces[name] = space.Space(size)
         if default or not self.default_space:
             self.default_space = name
@@ -102,11 +102,13 @@ class Game:
             self.spaces[name].default_vision_radius = default_vision_radius
         if default_wall_thickness:
             self.spaces[name].default_wall_thickness = default_wall_thickness
+        if default_speed:
+            self.spaces[name].default_speed = default_speed
 
-    def add_agent(self, loc, radius = None, colour = None, faction = None, vision_radius = None):
+    def add_agent(self, loc, radius = None, colour = None, faction = None, vision_radius = None, speed = None):
         if not self.default_space:
             return "There is no default space"
-        self.spaces[self.default_space].add_agent(loc, radius = radius, colour = colour, faction = faction, vision_radius = vision_radius)
+        self.spaces[self.default_space].add_agent(loc, radius = radius, colour = colour, faction = faction, vision_radius = vision_radius, speed = speed)
 
     def add_wall(self, start, end, thickness = None, colour = None):
         if not self.default_space:

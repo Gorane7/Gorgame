@@ -13,6 +13,7 @@ class Space:
         self.default_faction = None
         self.default_colour = "black"
         self.default_vision_radius = 10
+        self.default_speed = 5
         self.default_wall_thickness = 1.0
         self.default_wall_colour = "brown"
         self.faction_stats = {}
@@ -24,7 +25,7 @@ class Space:
             colour = self.default_wall_colour
         self.walls.append(Wall(start, end, thickness, colour))
 
-    def add_agent(self, loc, radius = None, colour = None, faction = None, vision_radius = None):
+    def add_agent(self, loc, radius = None, colour = None, faction = None, vision_radius = None, speed = None):
         if not faction:
             faction = self.default_faction
         if faction in self.faction_stats.keys():
@@ -34,15 +35,19 @@ class Space:
                 colour = self.faction_stats[faction]["colour"]
             if "vision_radius" in self.faction_stats[faction]:
                 vision_radius = self.faction_stats[faction]["vision_radius"]
+            if "speed" in self.faction_stats[faction]:
+                speed = self.faction_stats[faction]["speed"]
         if not radius:
             radius = self.default_agent_radius
         if not colour:
             colour = self.default_colour
         if not vision_radius:
             vision_radius = self.default_vision_radius
-        self.agents.append(Agent(loc, radius, colour, faction, vision_radius))
+        if not speed:
+            speed = self.default_speed
+        self.agents.append(Agent(loc, radius, colour, faction, vision_radius, speed))
 
-    def add_faction_stats(self, faction, agent_radius = None, colour = None, vision_radius = None):
+    def add_faction_stats(self, faction, agent_radius = None, colour = None, vision_radius = None, speed = None):
         self.faction_stats[faction] = {}
         if agent_radius:
             self.faction_stats[faction]["agent_radius"] = agent_radius
@@ -50,6 +55,8 @@ class Space:
             self.faction_stats[faction]["colour"] = colour
         if vision_radius:
             self.faction_stats[faction]["vision_radius"] = vision_radius
+        if speed:
+            self.faction_stats[faction]["speed"] = speed
 
 class Wall:
     def __init__(self, start, end, thickness, colour):
@@ -63,7 +70,7 @@ class Wall:
         self.colour = colour
 
 class Agent:
-    def __init__(self, loc, radius, colour, faction, vision_radius):
+    def __init__(self, loc, radius, colour, faction, vision_radius, speed):
         if isinstance(loc, basics.Coords):
             self.loc = loc
         else:
@@ -72,3 +79,4 @@ class Agent:
         self.colour = colour
         self.faction = faction
         self.vision_radius = vision_radius
+        self.speed = speed
